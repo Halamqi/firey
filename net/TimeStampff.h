@@ -1,6 +1,9 @@
 #ifndef FF_TIMESTAMP_H_
 #define FF_TIMESTAMP_H_
 
+#include <stdint.h>
+#include <string>
+
 namespace firey{
 
 class ffTimeStamp{
@@ -22,8 +25,8 @@ class ffTimeStamp{
 			std::swap(usSinceEpoch_,other.usSinceEpoch_);
 		}
 
-		string toString() const;
-		string toFormatString(bool show_us=true) const;
+		std::string toString() const;
+		std::string toFormatString(bool show_us=true) const;
 
 		static ffTimeStamp now();
 		static ffTimeStamp invalid(){return ffTimeStamp();}
@@ -43,15 +46,15 @@ class ffTimeStamp{
 		int64_t usSinceEpoch(){return usSinceEpoch_;}
 };
 
-inline bool opertor<(ffTimeStamp lhs,ffTimeStamp rhs){
+inline bool operator<(ffTimeStamp lhs,ffTimeStamp rhs){
 	return lhs.usSinceEpoch()<rhs.usSinceEpoch();
 }
 
-inline bool opertor==(ffTimeStamp lhs,ffTimeStamp rhs){
+inline bool operator==(ffTimeStamp lhs,ffTimeStamp rhs){
 	return lhs.usSinceEpoch()==rhs.usSinceEpoch();
 }
 
-inline bool opertor>(ffTimeStamp lhs,ffTimeStamp rhs){
+inline bool operator>(ffTimeStamp lhs,ffTimeStamp rhs){
 	return lhs.usSinceEpoch()>rhs.usSinceEpoch();
 }
 

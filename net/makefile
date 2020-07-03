@@ -1,8 +1,8 @@
 CPPFLAGS = -g -Wall -lpthread -std=c++11 
 
-ALL:test_eventloop
+ALL:test
 
-test_eventloop :./*.cpp
+test :./*.cpp
 	g++ $^ $(CPPFLAGS) -o $@
 
 .PHONY:ALL CLEAN

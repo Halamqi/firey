@@ -8,4 +8,4 @@ test :./*.cpp
 .PHONY:ALL CLEAN
 
 clean:
-	rm test_eventloop
+	rm test

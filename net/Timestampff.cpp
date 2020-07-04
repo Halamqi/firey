@@ -1,13 +1,13 @@
-#include "TimeStampff.h"
+#include "Timestampff.h"
 
 #include <sys/time.h>
 #include <stdio.h>
 
 using namespace firey;
 
-static_assert(sizeof(ffTimeStamp) == sizeof(int64_t),"TimeStamp is same as int64_t");
+static_assert(sizeof(Timestampff) == sizeof(int64_t),"TimeStamp is same as int64_t");
 
-std::string ffTimeStamp::toString() const{
+std::string Timestampff::toString() const{
 	char buf[32]={0};
 	int64_t seconds=usSinceEpoch_/kusPerSecond;
 	int64_t microSeconds=usSinceEpoch_%kusPerSecond;
@@ -16,7 +16,7 @@ std::string ffTimeStamp::toString() const{
 	return buf;
 }
 
-std::string ffTimeStamp::toFormatString(bool show_us) const{
+std::string Timestampff::toFormatString(bool show_us) const{
 	char buf[64]={0};
 	time_t seconds=static_cast<time_t>(usSinceEpoch_/kusPerSecond);
 	struct tm tm_time;
@@ -36,10 +36,10 @@ std::string ffTimeStamp::toFormatString(bool show_us) const{
 	return buf;
 }
 
-ffTimeStamp ffTimeStamp::now(){
+Timestampff Timestampff::now(){
 	struct timeval tv;
 	gettimeofday(&tv,NULL);
 	int64_t seconds=tv.tv_sec;
-	return ffTimeStamp(seconds*kusPerSecond+tv.tv_usec);
+	return Timestampff(seconds*kusPerSecond+tv.tv_usec);
 }
 

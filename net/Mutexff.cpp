@@ -8,36 +8,36 @@
 
 using namespace firey;
 
-ffMutex::ffMutex()
+Mutexff::Mutexff()
 	:holder_(0)
 {
 	if(pthread_mutex_init(&mutex_,NULL)!=0)
 		throw std::exception();
 }
 
-ffMutex::~ffMutex(){
+Mutexff::~Mutexff(){
 	assert(holder_==0);
 	int ret=pthread_mutex_destroy(&mutex_);
 	if(ret!=0) checkError(ret);
 }
 
-void ffMutex::lock(){
+void Mutexff::lock(){
 	int ret=pthread_mutex_lock(&mutex_);
 	if(ret!=0) checkError(ret);
-	holder_=ffCurrentThread::tid();
+	holder_=CurrentThreadff::tid();
 }
 
-void ffMutex::unlock(){
-	assert(holder_==ffCurrentThread::tid());
+void Mutexff::unlock(){
+	assert(holder_==CurrentThreadff::tid());
   	int ret=pthread_mutex_unlock(&mutex_);
 	if(ret!=0) checkError(ret);
 	holder_=0;
 }
 
-bool ffMutex::isHoldByCurrentThread(){
-	return holder_==ffCurrentThread::tid();
+bool Mutexff::isHoldByCurrentThread(){
+	return holder_==CurrentThreadff::tid();
 }
 
-void ffMutex::checkError(int check){
+void Mutexff::checkError(int check){
 	fprintf(stderr,"%s,%d,%s : %s\n",__FILE__,__LINE__,__func__,strerror(check));
 }

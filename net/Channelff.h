@@ -6,15 +6,15 @@
 
 namespace firey
 {
-class ffEventLoop;
+class EventLoopff;
 
-class ffChannel
+class Channelff
 {
 	public:
-		ffChannel(ffEventLoop* loop,int fd);
-		~ffChannel();
-		ffChannel(const ffChannel&) =delete;
-		ffChannel& operator=(const ffChannel&)=delete;
+		Channelff(EventLoopff* loop,int fd);
+		~Channelff();
+		Channelff(const Channelff&) =delete;
+		Channelff& operator=(const Channelff&)=delete;
 
 	public:
 		typedef std::function<void()> eventCallBack;
@@ -40,7 +40,7 @@ class ffChannel
 		int index(){return index_;}
 		void setIndex(int idx){index_=idx;}
 
-		ffEventLoop* ownerLoop(){return loop_;}
+		EventLoopff* ownerLoop(){return loop_;}
 
 		void enableReading(){events_=kReadEvent;update();}
 		void enableWriting(){events_=kWriteEvent;update();}
@@ -54,7 +54,7 @@ class ffChannel
 		void remove();
 	
 	private:
-		ffEventLoop* loop_;
+		EventLoopff* loop_;
 		
 		const int fd_;
 		int events_;
@@ -72,7 +72,7 @@ class ffChannel
 
 		bool eventHandling_;
 		bool addToLoop_;
-};//ffChannel
+};//Channelff
 }//namespace firey
 
 #endif //FF_CHANNEL_H_

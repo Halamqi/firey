@@ -14,7 +14,7 @@ static const int kNew=-1;
 static const int kAdded=1;
 static const int kDeleted=2;
 
-ffPoller::ffPoller(ffEventLoop* loop)
+Pollerff::Pollerff(EventLoopff* loop)
 	:ownerLoop_(loop),
 	eventsList_(kinitEventListSize),
 	epollFd_(::epoll_create(1))
@@ -22,11 +22,11 @@ ffPoller::ffPoller(ffEventLoop* loop)
 	assert(epollFd_>0);
 }
 
-ffPoller::~ffPoller(){
+Pollerff::~Pollerff(){
 	::close(epollFd_);
 }
 
-void ffPoller::poll(int timeoutMs,ChannelList* activeChannel){
+void Pollerff::poll(int timeoutMs,ChannelList* activeChannel){
 	int numEvents=::epoll_wait(epollFd_,
 			eventsList_.data(),
 			static_cast<int>(eventsList_.size()),
@@ -41,16 +41,16 @@ void ffPoller::poll(int timeoutMs,ChannelList* activeChannel){
 	}
 	else if(numEvents<0){
 		errno=saveErrno;
-		perror("ffPoller::poll()");
+		perror("Pollerff::poll()");
 	}
 	else {
 		printf("nothing happened\n");		
 	}
 }
 
-void ffPoller::fillActiveChannels(int numEvents,ChannelList* activeChannels) const {
+void Pollerff::fillActiveChannels(int numEvents,ChannelList* activeChannels) const {
 	for(int i=0;i<numEvents;i++){
-		ffChannel* channel=static_cast<ffChannel*>(eventsList_[i].data.ptr);
+		Channelff* channel=static_cast<Channelff*>(eventsList_[i].data.ptr);
 		int fd=channel->fd();
 		ChannelMap::const_iterator it=channels_.find(fd);
 		assert(it!=channels_.end());
@@ -60,7 +60,7 @@ void ffPoller::fillActiveChannels(int numEvents,ChannelList* activeChannels) con
 	}
 }
 
-void ffPoller::updateChannel(ffChannel* channel){
+void Pollerff::updateChannel(Channelff* channel){
 	ownerLoop_->assertInLoopThread();
 	const int idx=channel->index();
 	if(idx==kNew||idx==kDeleted){
@@ -96,7 +96,7 @@ void ffPoller::updateChannel(ffChannel* channel){
 	}
 }
 
-void ffPoller::removeChannel(ffChannel* channel){
+void Pollerff::removeChannel(Channelff* channel){
 	ownerLoop_->assertInLoopThread();
 	int fd=channel->fd();
 	assert(channels_.find(fd)!=channels_.end());
@@ -113,7 +113,7 @@ void ffPoller::removeChannel(ffChannel* channel){
 	channel->setIndex(kNew);
 }
 
-void ffPoller::update(int op,ffChannel* channel){
+void Pollerff::update(int op,Channelff* channel){
 	struct epoll_event temp;
 	memset(&temp,0,sizeof temp);
 
@@ -124,14 +124,14 @@ void ffPoller::update(int op,ffChannel* channel){
 
 	if(::epoll_ctl(epollFd_,op,fd,&temp)<0){
 		if(op==EPOLL_CTL_DEL)
-			perror("ffPoller::update()");
+			perror("Pollerff::update()");
 		else abort();
 	}
 
 }
 
 //查看channel是否在poller的channalMap中
-bool ffPoller::hasChannel(ffChannel* channel){
+bool Pollerff::hasChannel(Channelff* channel){
 	int fd=channel->fd();
 	return channels_.find(fd)!=channels_.end();
 }

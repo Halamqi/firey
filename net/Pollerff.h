@@ -9,34 +9,34 @@ struct epoll_event;
 
 namespace firey{
 
-class ffEventLoop;
-class ffChannel;
+class EventLoopff;
+class Channelff;
 
-class ffPoller{
+class Pollerff{
 
 	public:
-		ffPoller(ffEventLoop* loop);
-		~ffPoller();
-		ffPoller(const ffPoller&) = delete;
-		ffPoller& operator=(const ffPoller&) = delete;
+		Pollerff(EventLoopff* loop);
+		~Pollerff();
+		Pollerff(const Pollerff&) = delete;
+		Pollerff& operator=(const Pollerff&) = delete;
 
 		typedef std::vector<struct epoll_event> eventList;
-		typedef std::map<int,ffChannel*> ChannelMap;
-		typedef std::vector<ffChannel*> ChannelList;
+		typedef std::map<int,Channelff*> ChannelMap;
+		typedef std::vector<Channelff*> ChannelList;
 
 		int epollfd() const{return epollFd_;}
 
-		void removeChannel(ffChannel* channel);
-		void updateChannel(ffChannel* channel);
-		bool hasChannel(ffChannel* channel);
+		void removeChannel(Channelff* channel);
+		void updateChannel(Channelff* channel);
+		bool hasChannel(Channelff* channel);
 
 		void poll(int timeoutMs,ChannelList* activeChannels);
 	private:
-		ffEventLoop* ownerLoop_;
+		EventLoopff* ownerLoop_;
 		static const int kinitEventListSize=16;
 
 		void fillActiveChannels(int numEvents,ChannelList* activeChannels) const;
-		void update(int op,ffChannel* channel);	
+		void update(int op,Channelff* channel);	
 
 		eventList eventsList_;
 		ChannelMap channels_;
@@ -45,6 +45,6 @@ class ffPoller{
 
 		int epollFd_;
 
-};//class ffPoller
+};//class Pollerff
 }//namespace firey
 #endif //FF_POLLER_H_

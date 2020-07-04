@@ -6,67 +6,67 @@
 
 namespace firey{
 
-class ffTimeStamp{
+class Timestampff{
 	private:
 		int64_t usSinceEpoch_;
 
 	public:
-		ffTimeStamp()
+		Timestampff()
 			:usSinceEpoch_(0)
 		{
 		}
 
-		explicit ffTimeStamp(int64_t arg)
+		explicit Timestampff(int64_t arg)
 			:usSinceEpoch_(arg)
 		{
 		}
 
-		void swap(ffTimeStamp& other){
+		void swap(Timestampff& other){
 			std::swap(usSinceEpoch_,other.usSinceEpoch_);
 		}
 
 		std::string toString() const;
 		std::string toFormatString(bool show_us=true) const;
 
-		static ffTimeStamp now();
-		static ffTimeStamp invalid(){return ffTimeStamp();}
+		static Timestampff now();
+		static Timestampff invalid(){return Timestampff();}
 
 		static const int kusPerSecond = 1000*1000;
 
 
-		static ffTimeStamp fromUnixTime(time_t t){
+		/*static Timestampff fromUnixTime(time_t t){
 			return fromUnixTime(t,0);
 		}
 		
 		//second to microsecond
-		static ffTimeStamp fromUnixTime(time_t t,int us){
-			return ffTimeStamp(static_cast<int>(t)*kusPerSecond+us);
-		}
+		static Timestampff fromUnixTime(time_t t,int us){
+			return Timestampff(static_cast<int>(t)*kusPerSecond+us);
+		}*/
 
 		int64_t usSinceEpoch(){return usSinceEpoch_;}
 };
 
-inline bool operator<(ffTimeStamp lhs,ffTimeStamp rhs){
+inline bool operator<(Timestampff lhs,Timestampff rhs){
 	return lhs.usSinceEpoch()<rhs.usSinceEpoch();
 }
 
-inline bool operator==(ffTimeStamp lhs,ffTimeStamp rhs){
+inline bool operator==(Timestampff lhs,Timestampff rhs){
 	return lhs.usSinceEpoch()==rhs.usSinceEpoch();
 }
 
-inline bool operator>(ffTimeStamp lhs,ffTimeStamp rhs){
+inline bool operator>(Timestampff lhs,Timestampff rhs){
 	return lhs.usSinceEpoch()>rhs.usSinceEpoch();
 }
 
 //获取两个时间的差值（秒为单位）
-inline double timeDifference(ffTimeStamp high,ffTimeStamp low){
+inline double timeDifference(Timestampff high,Timestampff low){
 	int64_t diff=high.usSinceEpoch()-low.usSinceEpoch();
-	return static_cast<double>(diff)/ffTimeStamp::kusPerSecond;
+	return static_cast<double>(diff)/Timestampff::kusPerSecond;
 }
 
-inline ffTimeStamp addTime(ffTimeStamp time,double sec){
-	int64_t second=static_cast<int64_t>(sec*ffTimeStamp::kusPerSecond);
-	return ffTimeStamp(time.usSinceEpoch()+second);
+inline Timestampff addTime(Timestampff time,double sec){
+	int64_t second=static_cast<int64_t>(sec*Timestampff::kusPerSecond);
+	return Timestampff(time.usSinceEpoch()+second);
 }
 
 }//namespace firey

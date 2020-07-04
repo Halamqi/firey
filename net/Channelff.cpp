@@ -5,11 +5,11 @@
 #include <assert.h>
 using namespace firey;
 
-const int ffChannel::kNoneEvent=0;
-const int ffChannel::kReadEvent=EPOLLIN;
-const int ffChannel::kWriteEvent=EPOLLOUT;
+const int Channelff::kNoneEvent=0;
+const int Channelff::kReadEvent=EPOLLIN;
+const int Channelff::kWriteEvent=EPOLLOUT;
 
-ffChannel::ffChannel(ffEventLoop* loop,int fd)
+Channelff::Channelff(EventLoopff* loop,int fd)
 	:loop_(loop),
 	fd_(fd),
 	events_(0),
@@ -20,7 +20,7 @@ ffChannel::ffChannel(ffEventLoop* loop,int fd)
 {
 }
 
-ffChannel::~ffChannel(){
+Channelff::~Channelff(){
 	assert(!eventHandling_);
 	assert(!addToLoop_);
 
@@ -29,13 +29,13 @@ ffChannel::~ffChannel(){
 	}
 }
 
-void ffChannel::update(){
+void Channelff::update(){
 	loop_->assertInLoopThread();
 	addToLoop_=true;
 	loop_->updateChannel(this);
 }
 
-void ffChannel::handleEvent(){
+void Channelff::handleEvent(){
 	loop_->assertInLoopThread();
 	//if(revents_ & EPOLLNVAL){
 		
@@ -51,7 +51,7 @@ void ffChannel::handleEvent(){
 	}
 }
 
-void ffChannel::remove(){
+void Channelff::remove(){
 	assert(isNoneEvent());
 	addToLoop_=false;
 	loop_->removeChannel(this);

@@ -4,12 +4,12 @@
 
 namespace firey{
 
-class ffMutex{
+class Mutexff{
 public:
-	ffMutex();
-	~ffMutex();
-	ffMutex(const ffMutex&) = delete;
-	ffMutex& operator=(const ffMutex&) = delete;
+	Mutexff();
+	~Mutexff();
+	Mutexff(const Mutexff&) = delete;
+	Mutexff& operator=(const Mutexff&) = delete;
 
 	void lock();
 	void unlock();

@@ -5,23 +5,23 @@
 
 namespace firey{
 
-class ffMutexGuard{
+class MutexGuardff{
 	public:
-		ffMutexGuard(ffMutex& m)
+		MutexGuardff(Mutexff& m)
 			:mutex(m){
 			mutex.lock();
 			}
 
-		~ffMutexGuard(){
+		~MutexGuardff(){
 			mutex.unlock();
 		}
-		ffMutexGuard(const ffMutexGuard&) = delete;
-		ffMutexGuard& operator= (const ffMutexGuard&) = delete;
+		MutexGuardff(const MutexGuardff&) = delete;
+		MutexGuardff& operator= (const MutexGuardff&) = delete;
 
 	private:
-		ffMutex& mutex;
+		Mutexff& mutex;
 
-};//ffMutexGuard
+};//MutexGuardff
 
 }//namespace firey
 

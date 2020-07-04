@@ -10,12 +10,12 @@
 
 namespace firey{
 
-class ffPoller;
-class ffChannel;
+class Pollerff;
+class Channelff;
 
-class ffEventLoop{
+class EventLoopff{
 	private:
-		typedef std::vector<ffChannel*> ChannelList;
+		typedef std::vector<Channelff*> ChannelList;
 		ChannelList activeChannels_;
 
 		bool looping_;
@@ -25,27 +25,27 @@ class ffEventLoop{
 		
 		void abortNotInLoopThread();
 
-		std::unique_ptr<ffPoller> poller_;
+		std::unique_ptr<Pollerff> poller_;
 
 		static const int kPollWaitTime=10*1000;		
 
 		typedef std::function<void()> Functor;
 		std::vector<Functor> pendingFunctors_;
-		ffMutex mutex_;
+		Mutexff mutex_;
 		bool callingPendingFunctors_;	
 		void doPendingFunctors();
 
 		const int wakeupFd_;
-		std::unique_ptr<ffChannel> wakeupChannel_;
+		std::unique_ptr<Channelff> wakeupChannel_;
 		void handleWakeupRead();
 
 	public:
-		ffEventLoop();
-		~ffEventLoop();
-		ffEventLoop(const ffEventLoop&) = delete;
-		ffEventLoop& operator= (const ffEventLoop&) = delete;
+		EventLoopff();
+		~EventLoopff();
+		EventLoopff(const EventLoopff&) = delete;
+		EventLoopff& operator= (const EventLoopff&) = delete;
 
-		bool isInLoopThread() const {return threadId_ == ffCurrentThread::tid();}
+		bool isInLoopThread() const {return threadId_ == CurrentThreadff::tid();}
 
 		void assertInLoopThread(){
 			if(!isInLoopThread()){
@@ -57,9 +57,9 @@ class ffEventLoop{
 		void quit();
 
 	public:
-		void updateChannel(ffChannel* channel);
-		void removeChannel(ffChannel* channel);
-		bool hasChannel(ffChannel* channel);
+		void updateChannel(Channelff* channel);
+		void removeChannel(Channelff* channel);
+		bool hasChannel(Channelff* channel);
 	
 	public:
 		void runInLoop(Functor cb);

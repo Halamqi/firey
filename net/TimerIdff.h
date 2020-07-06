@@ -5,16 +5,16 @@ namespace firey{
 
 class Timerff;
 
-class TimerffId{
+class TimerIdff{
 
 	public:
-		TimerffId(Timerff* timer,uint64_t seq)
+		TimerIdff(Timerff* timer,uint64_t seq)
 			:timer_(timer),
 			sequence_(seq)
 		{
 		}
 
-		TimerffId()
+		TimerIdff()
 			:timer_(nullptr),
 			sequence_(0)
 		{

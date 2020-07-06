@@ -6,16 +6,16 @@
 #include <string.h>
 
 namespace firey{
-class ffCondition{
+class Conditionff{
 	public:
-		ffCondition(Mutex& m)
+		Conditionff(Mutex& m)
 			:mutex_(m)
 		{
 			int ret=pthread_cond_init(&cond_,NULL);
 			if(ret!=0) checkError(ret);
 		}
 
-		~ffCondition(){
+		~Conditionff(){
 			int ret=pthread_cond_destroy(&cond_);
 			if(ret!=0) checkError(ret);
 		}
@@ -37,12 +37,12 @@ class ffCondition{
 
 	private:
 		pthread_cond_t cond_;
-		ffMutex& mutex_;
+		Mutexff& mutex_;
 		void checkError(int check){
 			fprintf(stderr,"%s,%d,%s : %s",__FILE__,__LINE__,__func__,strerror(check));
 		}
 
-};//ffCondition
+};//Conditionff
 
 }//namespace firey
 

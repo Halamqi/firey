@@ -52,7 +52,7 @@ class TimerQueueff{
 
 		bool insertTimer(Timerff* timer);
 
-		std::vector<ActiveTimer> cancelingTimers_;
+		std::set<ActiveTimer> cancelingTimers_;
 };
 
 

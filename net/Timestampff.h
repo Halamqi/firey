@@ -30,9 +30,10 @@ class Timestampff{
 
 		static Timestampff now();
 		static Timestampff invalid(){return Timestampff();}
+		bool isValid() const {return usSinceEpoch_!=0;}
 
 		static const int kusPerSecond = 1000*1000;
-
+	
 
 		/*static Timestampff fromUnixTime(time_t t){
 			return fromUnixTime(t,0);

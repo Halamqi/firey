@@ -76,6 +76,9 @@ TimerQueueff::~TimerQueueff(){
 	}
 }
 
+
+//当timerfd可读时，表明有定时器到期，读取timerfd，并获取到期的定时器，执行之
+//如果定时器时重复的，并且没有被取消，那么restart它
 void TimerQueueff::handleTimerfdRead(){
 	ownerLoop_->assertInLoopThread();
 	Timestampff now(Timestampff::now());
@@ -96,7 +99,26 @@ void TimerQueueff::handleTimerfdRead(){
 }
 
 void TimerQueueff::reset(std::vector<TimerQueueff::TimerNode> expired,Timestampff now){
+	ownerLoop_->assertInLoopThread();
 	
+	for(const auto& it:expired){
+		ActiveTimer timer(it.second,it.second->sequence());
+
+		if(it.second->isRepeat()||cancelingTimers_.find(timer)==cancelingTimers_.end()){
+			it.second->restart(now);
+			insertTimer(it.second);	
+		}
+		else delete it.second;
+	}
+
+	Timestampff nextExpire;
+	if(!timers_.empty()){
+		nextExpire=timers_.begin()->first;
+	}
+	
+	if(nextExpire.isValid()){
+		resetTimerfd(timerFd_,nextExpire);
+	}
 }
 
 std::vector<TimerQueueff::TimerNode> TimerQueueff::getExpiredTimer(Timestampff now){
@@ -121,6 +143,7 @@ std::vector<TimerQueueff::TimerNode> TimerQueueff::getExpiredTimer(Timestampff n
 	return expired;
 }
 
+//插入定时器
 TimerIdff TimerQueueff::addTimer(timerCallback cb,Timestampff when,double interval){
 	Timerff* timer=new Timerff(std::move(cb),when,interval);
 	ownerLoop_->runInLoop(

@@ -12,21 +12,24 @@ namespace firey{
 class Timestampff;
 class Channelff;
 class EventLoopff;
+class TimerIdff;
 
 class TimerQueueff{
 	public:
 		TimerQueueff(EventLoopff* loop);
 		~TimerQueueff();
-		
+
 		TimerQueueff(const TimerQueueff&)=delete;
 		TimerQueueff& operator=(const TimerQueueff&)=delete;
 
-		void addTimer(TimerCallback cb,Timestampff when,double interval);
+		typedef std::function<void()> timerCallback;
+		
+		TimerIdff addTimer(timerCallback cb,Timestampff when,double interval);
 	
-		void cancel(ffTimerId& timer);
+		void cancel(TimerIdff& timer);
 
 	private:
-		EventLoopff ownerLoop_;
+		EventLoopff* ownerLoop_;
 		
 		const int timerFd_;
 		std::unique_ptr<Channelff> timerChannel_;
@@ -36,13 +39,20 @@ class TimerQueueff{
 		typedef std::set<TimerNode> TimerTree;
 		TimerTree timers_;
 
-		void addTimerInLoop(Timerff* timer);
+		typedef std::pair<Timerff*,uint64_t> ActiveTimer;
+		typedef std::set<ActiveTimer> activeTimerSet;
+		activeTimerSet activeTimers_;
 		
 		bool callingExpiredTimers_;
-		std::vector<TimerNode> getExpired(Timestampff now);
-		
+
+		void addTimerInLoop(Timerff* timer);
+
+		std::vector<TimerNode> getExpiredTimer(Timestampff now);
+		void reset(std::vector<TimerNode> expired,Timestampff now);
+
 		bool insertTimer(Timerff* timer);
 
+		std::vector<ActiveTimer> cancelingTimers_;
 };
 
 

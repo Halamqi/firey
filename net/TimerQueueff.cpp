@@ -104,7 +104,7 @@ void TimerQueueff::reset(std::vector<TimerQueueff::TimerNode> expired,Timestampf
 	for(const auto& it:expired){
 		ActiveTimer timer(it.second,it.second->sequence());
 
-		if(it.second->isRepeat()||cancelingTimers_.find(timer)==cancelingTimers_.end()){
+		if(it.second->isRepeat()&&cancelingTimers_.find(timer)==cancelingTimers_.end()){
 			it.second->restart(now);
 			insertTimer(it.second);	
 		}
@@ -182,4 +182,29 @@ bool TimerQueueff::insertTimer(Timerff* timer){
 	return earliestChanged;
 }
 
+//cancel timer 
+void TimerQueueff::cancel(TimerIdff timerId){
+	ownerLoop_->runInLoop(
+			std::bind(&TimerQueueff::cancelInLoop,this,timerId));
+}
 
+void TimerQueueff::cancelInLoop(TimerIdff timerId){
+	ownerLoop_->assertInLoopThread();
+
+	assert(timers_.size()==activeTimers_.size());
+	ActiveTimer timer(timerId.timer(),timerId.sequence());
+	activeTimerSet::iterator it=activeTimers_.find(timer);
+	if(it!=activeTimers_.end()){
+		timers_.erase(TimerNode(it->first->expireTime(),it->first));
+		delete it->first;
+		activeTimers_.erase(it);
+	}
+	//当正在调用过期的定时器时，有可能要取消的定时器不在两个定时器集合中(timers_和activeTimers_)
+	//此时无法从两个集合中直接删除，需要将其推入待取消的定时器队列中，待过期的定时器任务执行完毕之后
+	//再重置到期的定时器，此时如果该定时在待取消的定时器队列中，则不重置它（或者非重复定时器也不重置）
+	else if(callingExpiredTimers_){
+		cancelingTimers_.insert(timer);
+	}
+
+	assert(timers_.size()==activeTimers_.size());
+}	

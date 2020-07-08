@@ -3,6 +3,8 @@
 
 #include "CurrentThreadff.h"
 #include "Mutexff.h"
+#include "Timerff.h"
+#include "TimerIdff.h"
 
 #include <memory>
 #include <vector>
@@ -12,6 +14,7 @@ namespace firey{
 
 class Pollerff;
 class Channelff;
+class TimerQueueff;
 
 class EventLoopff{
 	private:
@@ -31,6 +34,7 @@ class EventLoopff{
 
 		typedef std::function<void()> Functor;
 		std::vector<Functor> pendingFunctors_;
+
 		Mutexff mutex_;
 		bool callingPendingFunctors_;	
 		void doPendingFunctors();
@@ -38,6 +42,8 @@ class EventLoopff{
 		const int wakeupFd_;
 		std::unique_ptr<Channelff> wakeupChannel_;
 		void handleWakeupRead();
+
+		std::unique_ptr<TimerQueueff> timerQueue_;
 
 	public:
 		EventLoopff();
@@ -66,6 +72,15 @@ class EventLoopff{
 		void queueInLoop(Functor cb);
 		void wakeup();
 
+	//for timer
+	public:
+		typedef std::function<void()> timerCallback;
+
+		TimerIdff runAt(Timestampff when,timerCallback cb);
+		TimerIdff runAfter(double after,timerCallback cb);
+		TimerIdff runEvery(double interval,timerCallback cb);
+
+		void cancel(TimerIdff timer);
 };
 
 }//namespace firey

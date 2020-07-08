@@ -2,6 +2,7 @@
 #include "Pollerff.h"
 #include "Channelff.h"
 #include "MutexGuardff.h"
+#include "TimerQueueff.h"
 
 #include <assert.h>
 #include <poll.h>
@@ -39,7 +40,8 @@ EventLoopff::EventLoopff()
 	poller_(new Pollerff(this)),
 	callingPendingFunctors_(false),
 	wakeupFd_(createEventFd()),
-	wakeupChannel_(new Channelff(this,wakeupFd_))
+	wakeupChannel_(new Channelff(this,wakeupFd_)),
+	timerQueue_(new TimerQueueff(this))
 {
 	assert(!t_loopInThisThread);
 	t_loopInThisThread=this;
@@ -150,4 +152,22 @@ void EventLoopff::handleWakeupRead(){
 	if(n!=sizeof tick){
 		fprintf(stderr,"EventLoopff::wakeup() wakeup failed\n");
 	}
+}
+
+TimerIdff EventLoopff::runAt(Timestampff when,timerCallback cb){
+	return timerQueue_->addTimer(std::move(cb),when,0.0);
+}
+
+TimerIdff EventLoopff::runAfter(double after,timerCallback cb){
+	Timestampff when(addTime(Timestampff::now(),after));
+	return timerQueue_->addTimer(std::move(cb),when,0.0);
+}
+
+TimerIdff EventLoopff::runEvery(double interval,timerCallback cb){
+	Timestampff when(addTime(Timestampff::now(),interval));
+	return timerQueue_->addTimer(std::move(cb),when,interval);
+}
+
+void EventLoopff::cancel(TimerIdff timer){
+	timerQueue_->cancel(timer);
 }

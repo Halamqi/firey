@@ -26,7 +26,7 @@ class TimerQueueff{
 		
 		TimerIdff addTimer(timerCallback cb,Timestampff when,double interval);
 	
-		void cancel(TimerIdff& timer);
+		void cancel(TimerIdff timer);
 
 	private:
 		EventLoopff* ownerLoop_;
@@ -52,7 +52,11 @@ class TimerQueueff{
 
 		bool insertTimer(Timerff* timer);
 
+		//为了防止待取消的定时器到期正在执行，在两个定时器集合中找不到，
+		//所以将其添加到待取消的定时器，待到期定时器执行完毕以后，判断是否在待取消的定时器队列中，
+		//如果在待取消的定时器队列中，即便是重复的定时器也不重置它
 		std::set<ActiveTimer> cancelingTimers_;
+		void cancelInLoop(TimerIdff timerId);
 };
 
 

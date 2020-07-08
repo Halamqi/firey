@@ -19,7 +19,10 @@ class TimerIdff{
 			sequence_(0)
 		{
 		}
-	
+
+		Timerff* timer(){return timer_;}
+		uint64_t sequence(){return sequence_;}
+
 	private:
 		Timerff* timer_;
 		uint64_t sequence_;

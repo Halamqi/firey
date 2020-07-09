@@ -1,6 +1,8 @@
 #ifndef FF_INETADDRESS_H_
 #define FF_INETADDRESS_H_
 
+#include "Socketopsff.h"
+
 #include <string>
 #include <netinet/in.h>
 

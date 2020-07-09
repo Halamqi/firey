@@ -1,6 +1,8 @@
 #ifndef FF_SOCKET_H_
 #define FF_SOCKET_H_
 
+#include "Socketopsff.h"
+
 namespace firey{
 
 class InetAddressff;
@@ -27,9 +29,9 @@ class Socketff{
 		void shutdown();
 
 		void setTcpNoDelay(bool on);
-		void setReuseAddr(bool on);
-		void setReusePort(bool on);
-		void setKeepAlive(bool on);
+		void setTcpReuseAddr(bool on);
+		void setTcpReusePort(bool on);
+		void setTcpKeepAlive(bool on);
 
 };//class Socketff
 

@@ -17,7 +17,7 @@ class InetAddressff{
 		explicit InetAddressff(const struct sockaddr_in& addr)
 			:addr_(addr){}
 
-		explicit InetAddressff(uint16_t port);
+		explicit InetAddressff(uint16_t port=0);
 
 		InetAddressff(const std::string& ip,uint16_t port);
 

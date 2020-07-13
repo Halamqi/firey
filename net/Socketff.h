@@ -24,11 +24,12 @@ class Socketff{
 		
 		void bindAddress(const InetAddressff& localAddr);
 		void listen();
+		//peerAddr用来存储客户端的地址
 		int accept(InetAddressff& peerAddr);
 		
 		void shutdown();
 
-		void setTcpNoDelay(bool on);
+//		void setTcpNoDelay(bool on);
 		void setTcpReuseAddr(bool on);
 		void setTcpReusePort(bool on);
 		void setTcpKeepAlive(bool on);

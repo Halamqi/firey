@@ -19,6 +19,8 @@ namespace Socket{
 
 	int accept(int sockfd,struct sockaddr_in* addr);
 
+	void closeOrDie(int sockfd);
+
 	void shutdownWrite(int sockfd);
 
 	void fromIpPort(const char* ip,uint16_t port,struct sockaddr_in* addr);

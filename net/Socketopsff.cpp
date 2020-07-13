@@ -65,6 +65,13 @@ int Socket::accept(int sockfd,struct sockaddr_in* addr){
 	return connfd;
 }
 
+void Socket::closeOrDie(int sockfd){
+	int ret=::close(sockfd);
+	if(ret<0){
+		fprintf(stderr,"listenOrDie(),%s",strerror(ret));
+		abort();
+	}
+}
 void Socket::shutdownWrite(int sockfd){
 	::shutdown(sockfd,SHUT_WR);
 }

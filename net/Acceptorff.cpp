@@ -18,7 +18,7 @@ Acceptorff::Acceptorff(EventLoopff* loop,const InetAddressff& listenAddr,bool re
 	acceptSocket_.setTcpReusePort(reuseport);
 	acceptSocket_.bindAddress(listenAddr);
 
-	acceptChannel_.setReadCallBack(
+	acceptChannel_.setReadCallback(
 			std::bind(&Acceptorff::handleRead,this));
 }
 

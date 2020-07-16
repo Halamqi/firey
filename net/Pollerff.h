@@ -11,6 +11,7 @@ namespace firey{
 
 class EventLoopff;
 class Channelff;
+class Timestampff;
 
 class Pollerff{
 
@@ -30,7 +31,7 @@ class Pollerff{
 		void updateChannel(Channelff* channel);
 		bool hasChannel(Channelff* channel);
 
-		void poll(int timeoutMs,ChannelList* activeChannels);
+		Timestampff poll(int timeoutMs,ChannelList* activeChannels);
 	private:
 		EventLoopff* ownerLoop_;
 		static const int kinitEventListSize=16;
@@ -40,8 +41,6 @@ class Pollerff{
 
 		eventList eventsList_;
 		ChannelMap channels_;
-
-
 
 		int epollFd_;
 

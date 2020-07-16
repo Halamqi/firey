@@ -28,6 +28,16 @@ namespace Socket{
 	void toIp(char* buf,int size,const struct sockaddr_in* addr);
 	
 	void toIpPort(char* buf,int size,const struct sockaddr_in* addr);
+
+	struct sockaddr_in getLocalAddr(int sockfd);
+
+	struct sockaddr_in getPeerAddr(int sockfd);
+
+	int connect(int sockfd,const struct sockaddr_in* addr);
+	ssize_t read(int sockfd,void* buf,size_t count);
+	ssize_t readv(int sockfd,const struct iovec* iov,int iovcnt);
+	ssize_t write(int sockfd,const void* buf,size_t count);
+	
 	
 }//namespace Socket
 

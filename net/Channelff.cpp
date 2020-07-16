@@ -35,7 +35,7 @@ void Channelff::update(){
 	loop_->updateChannel(this);
 }
 
-void Channelff::handleEvent(){
+void Channelff::handleEvent(Timestampff receiveTime){
 	loop_->assertInLoopThread();
 	//if(revents_ & EPOLLNVAL){
 		
@@ -44,7 +44,7 @@ void Channelff::handleEvent(){
 		if(errorCallBack_) errorCallBack_();
 	}
 	if(revents_ & (EPOLLIN|EPOLLPRI|EPOLLRDHUP)){
-		if(readCallBack_) readCallBack_();
+		if(readCallBack_) readCallBack_(receiveTime);
 	}
 	if(revents_ & EPOLLOUT){
 		if(writeCallBack_) writeCallBack_();	

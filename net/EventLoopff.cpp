@@ -3,6 +3,7 @@
 #include "Channelff.h"
 #include "MutexGuardff.h"
 #include "TimerQueueff.h"
+#include "Timestampff.h"
 
 #include <assert.h>
 #include <poll.h>
@@ -41,12 +42,12 @@ EventLoopff::EventLoopff()
 	callingPendingFunctors_(false),
 	wakeupFd_(createEventFd()),
 	wakeupChannel_(new Channelff(this,wakeupFd_)),
-	timerQueue_(new TimerQueueff(this))
+	timerQueue_(new TimerQueueff(this))	
 {
 	assert(!t_loopInThisThread);
 	t_loopInThisThread=this;
 
-	wakeupChannel_->setReadCallBack(
+	wakeupChannel_->setReadCallback(
 			std::bind(&EventLoopff::handleWakeupRead,this));
 	wakeupChannel_->enableReading();
 }
@@ -65,11 +66,11 @@ void EventLoopff::loop(){
 	looping_=true;
 	while(!quit_){
 		activeChannels_.clear();
-		poller_->poll(kPollWaitTime,&activeChannels_);
-
+		pollReturnTime_=poller_->poll(kPollWaitTime,&activeChannels_);
+		
 		eventHandling_=true;
 		for(auto ach:activeChannels_){
-			ach->handleEvent();
+			ach->handleEvent(pollReturnTime_);
 		}
 		eventHandling_=false;
 		

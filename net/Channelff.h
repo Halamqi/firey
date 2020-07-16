@@ -6,7 +6,9 @@
 
 namespace firey
 {
+
 class EventLoopff;
+class Timestampff;
 
 class Channelff
 {
@@ -17,17 +19,21 @@ class Channelff
 		Channelff& operator=(const Channelff&)=delete;
 
 	public:
+		typedef std::function<void(Timestampff)> ReadEventCallback;
 		typedef std::function<void()> eventCallBack;
-		void setReadCallBack(eventCallBack rcb){
+		void setReadCallback(ReadEventCallback rcb){
 			readCallBack_=std::move(rcb);
 		}
-		void setWriteCallBack(eventCallBack wcb){
+		void setWriteCallback(eventCallBack wcb){
 			writeCallBack_=std::move(wcb);
 		}
-		void setErrorCallBack(eventCallBack ecb){
+		void setErrorCallback(eventCallBack ecb){
 			errorCallBack_=std::move(ecb);
 		}
 
+		void setCloseCallback(eventCallBack cb){
+			closeCallback_=std::move(cb);
+		}
 		int fd() const{return fd_;}
 		int events() const{return events_;}
 		int revents() const{ return revents_;}
@@ -49,7 +55,7 @@ class Channelff
 		bool isWriting(){return events_==kWriteEvent;}
 
 	public:
-		void handleEvent();
+		void handleEvent(Timestampff receiveTime);
 		void update();
 		void remove();
 	
@@ -66,9 +72,10 @@ class Channelff
 
 		int index_;
 		
-		eventCallBack readCallBack_;
+		ReadEventCallback readCallBack_;
 		eventCallBack writeCallBack_;
 		eventCallBack errorCallBack_;
+		eventCallBack closeCallback_;
 
 		bool eventHandling_;
 		bool addToLoop_;

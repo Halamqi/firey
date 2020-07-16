@@ -26,12 +26,12 @@ Pollerff::~Pollerff(){
 	::close(epollFd_);
 }
 
-void Pollerff::poll(int timeoutMs,ChannelList* activeChannel){
+Timestampff Pollerff::poll(int timeoutMs,ChannelList* activeChannel){
 	int numEvents=::epoll_wait(epollFd_,
 			eventsList_.data(),
 			static_cast<int>(eventsList_.size()),
 			timeoutMs);
-
+	Timestampff returnTime(Timestampff::now());
 	int saveErrno=errno;
 	if(numEvents>0){
 		fillActiveChannels(numEvents,activeChannel);
@@ -46,6 +46,7 @@ void Pollerff::poll(int timeoutMs,ChannelList* activeChannel){
 	else {
 		printf("nothing happened\n");		
 	}
+	return returnTime;
 }
 
 void Pollerff::fillActiveChannels(int numEvents,ChannelList* activeChannels) const {

@@ -33,6 +33,7 @@ int main(){
 	acceptor.listen();
 	pthread_t tid;
 	pthread_create(&tid,NULL,quitThread,reinterpret_cast<void*>(&loop));
+	pthread_detach(tid);
 	loop.loop();
 	return 0;
 }

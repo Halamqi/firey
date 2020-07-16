@@ -102,3 +102,38 @@ void Socket::toIpPort(char* buf,int size,const struct sockaddr_in* addr){
 
 }
 
+struct sockaddr_in Socket::getLocalAddr(int sockfd){
+	sockaddr_in localaddr;
+	memset(&localaddr,0,sizeof localaddr);
+	socklen_t addrLen=static_cast<socklen_t>(sizeof(localaddr));
+	if(::getsockname(sockfd,(struct sockaddr*)&localaddr,&addrLen)<0){
+		fprintf(stderr,"Socket::getLocalAddr()");
+	}
+	return localaddr;
+}
+
+struct sockaddr_in Socket::getPeerAddr(int sockfd){
+	sockaddr_in peerAddr;
+	memset(&peerAddr,0,sizeof peerAddr);
+	socklen_t addrLen=static_cast<socklen_t>(sizeof(peerAddr));
+	if(::getpeername(sockfd,(struct sockaddr*)&peerAddr,&addrLen)<0){
+		fprintf(stderr,"Socket::getLocalAddr()");
+	}
+	return peerAddr;
+}
+
+int Socket::connect(int sockfd,const struct sockaddr_in* addr){
+	return ::connect(sockfd,(struct sockaddr*)addr,static_cast<socklen_t>(sizeof(struct sockaddr_in)));
+}
+
+ssize_t Socket::read(int sockfd,void* buf,size_t count){
+	return ::read(sockfd,buf,count);
+}
+
+ssize_t Socket::readv(int sockfd,const struct iovec* iov,int iovcnt){
+	return ::readv(sockfd,iov,iovcnt);
+}
+
+ssize_t Socket::write(int sockfd,const void* buf,size_t count){
+	return ::write(sockfd,buf,count);
+}

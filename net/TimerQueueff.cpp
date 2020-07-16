@@ -4,6 +4,7 @@
 #include "EventLoopff.h"
 #include "Timerff.h"
 #include "TimerIdff.h"
+#include "Callbacksff.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -60,7 +61,7 @@ TimerQueueff::TimerQueueff(EventLoopff* loop)
 	timerChannel_(new Channelff(ownerLoop_,timerFd_)),
 	callingExpiredTimers_(false)
 {
-	timerChannel_->setReadCallBack(
+	timerChannel_->setReadCallback(
 			std::bind(&TimerQueueff::handleTimerfdRead,this));
 	timerChannel_->enableReading();
 }

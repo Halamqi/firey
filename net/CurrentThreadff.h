@@ -4,22 +4,29 @@
 #include <unistd.h>
 #include <sys/syscall.h>
 
-static __thread int cached_tid=0;
 
 namespace firey{
-class CurrentThreadff{
-	public:	
-	static pid_t gettid(){
-		return static_cast<pid_t>(::syscall(SYS_gettid));
-	}
 
-	static int tid(){
-		if(cached_tid==0){
-			cached_tid=static_cast<int>(gettid());
+
+	namespace CurrentThreadff{	
+		extern __thread int ff_cached_tid;
+		extern __thread const char* t_threadName;
+
+		pid_t gettid();
+
+		inline int tid(){
+			if(ff_cached_tid==0){
+				ff_cached_tid=static_cast<int>(gettid());
+			}
+			return ff_cached_tid;
 		}
-		return cached_tid;
-	}
-};//CurrentThread
+
+		inline const char* name(){
+			return t_threadName;
+		}
+
+	}//namespace CurrentThreadff
+
 }//firey
 
 #endif //FF_CURRENTTHREAD_H_

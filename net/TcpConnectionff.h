@@ -3,6 +3,7 @@
 
 #include "Callbacksff.h"
 #include "InetAddressff.h"
+#include "Bufferff.h"
 
 #include <string>
 
@@ -33,8 +34,10 @@ class TcpConnectionff:public std::enable_shared_from_this<TcpConnectionff>
 		bool connected() const {return state_==kConnected;}
 		bool disconnected() const {return state_==kDisconnected;}
 
+		void send(const std::string& message);
 		void send(const void* message,int len);
-		
+		void send(Bufferff* buffer);
+			
 		void shutdown();
 
 		void startRead();
@@ -96,7 +99,7 @@ class TcpConnectionff:public std::enable_shared_from_this<TcpConnectionff>
 		void handleError();
 		void handleClose();
 
-		void sendInLoop(const std::string& message);
+//		void sendInLoop(const std::string& message);
 		void sendInLoop(const void* message,size_t len);
 		
 		void shutdownInLoop();
@@ -106,6 +109,10 @@ class TcpConnectionff:public std::enable_shared_from_this<TcpConnectionff>
 
 		void setState(ConnState s){state_=s;}
 		const std::string& stateToString() const;
+
+		Bufferff inputBuffer_;
+		Bufferff outputBuffer_;
+
 };//class TcpConnectionff
 
 }//namespace firey

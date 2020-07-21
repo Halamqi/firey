@@ -29,8 +29,8 @@ TcpServerff::~TcpServerff(){
 	for(auto& item:connections_){
 		TcpConnectionPtr conn(item.second);
 		item.second.reset();
-		//conn->getLoop()->runInLoop(
-		//		std::bind(&TcpConnectionff::connectionDestroy,conn));
+		conn->getLoop()->runInLoop(
+				std::bind(&TcpConnectionff::connectionDestroy,conn));
 	}
 }
 
@@ -50,8 +50,8 @@ void TcpServerff::newConnection(int sockfd,const InetAddressff& peerAddr){
 	conn->setWriteCompleteCallback(writeCompleteCallback_);
 	conn->setCloseCallback(
 			std::bind(&TcpServerff::removeConnection,this,_1));
-//	ownerLoop_->runInLoop(
-//			std::bind(&TcpConnectionff::connectionEstablished,conn));
+	ownerLoop_->runInLoop(
+			std::bind(&TcpConnectionff::connectionEstablished,conn));
 }
 
 void TcpServerff::start(){

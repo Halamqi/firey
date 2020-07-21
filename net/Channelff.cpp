@@ -3,6 +3,7 @@
 
 #include <sys/epoll.h>
 #include <assert.h>
+
 using namespace firey;
 
 const int Channelff::kNoneEvent=0;
@@ -16,7 +17,8 @@ Channelff::Channelff(EventLoopff* loop,int fd)
 	revents_(0),
 	index_(-1),
 	eventHandling_(false),
-	addToLoop_(false)
+	addToLoop_(false),
+	tied_(false)
 {
 }
 
@@ -36,6 +38,19 @@ void Channelff::update(){
 }
 
 void Channelff::handleEvent(Timestampff receiveTime){
+	std::shared_ptr<void> guard;
+	if(tied_){
+		guard=tie_.lock();
+		if(guard){
+			handleEventWithGuard(receiveTime);
+		}
+	}
+	else{
+		handleEventWithGuard(receiveTime);
+	}
+}
+
+void Channelff::handleEventWithGuard(Timestampff receiveTime){
 	loop_->assertInLoopThread();
 	//if(revents_ & EPOLLNVAL){
 		
@@ -55,4 +70,9 @@ void Channelff::remove(){
 	assert(isNoneEvent());
 	addToLoop_=false;
 	loop_->removeChannel(this);
+}
+
+void Channelff::tie(const std::shared_ptr<void>& obj){
+	tie_=obj;
+	tied_=true;
 }

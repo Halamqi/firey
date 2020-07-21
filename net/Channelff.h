@@ -2,7 +2,7 @@
 #define FF_CHANNEL_H_
 
 #include <functional>
-
+#include <memory>
 
 namespace firey
 {
@@ -48,12 +48,16 @@ class Channelff
 
 		EventLoopff* ownerLoop(){return loop_;}
 
-		void enableReading(){events_=kReadEvent;update();}
-		void enableWriting(){events_=kWriteEvent;update();}
+		void enableReading(){events_|=kReadEvent;update();}
+		void enableWriting(){events_|=kWriteEvent;update();}
+
+		void disableReading(){events_&=~kReadEvent;update();}
+		void disableWriting(){events_&=~kWriteEvent;update();}
 
 		bool isReading(){return events_==kReadEvent;}
 		bool isWriting(){return events_==kWriteEvent;}
 
+		void tie(const std::shared_ptr<void>& obj);
 	public:
 		void handleEvent(Timestampff receiveTime);
 		void update();
@@ -77,8 +81,12 @@ class Channelff
 		eventCallBack errorCallBack_;
 		eventCallBack closeCallback_;
 
+		void handleEventWithGuard(Timestampff receiveTime);
 		bool eventHandling_;
 		bool addToLoop_;
+
+		std::weak_ptr<void> tie_;
+		bool tied_;
 };//Channelff
 }//namespace firey
 

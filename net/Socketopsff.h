@@ -33,6 +33,8 @@ namespace Socket{
 
 	struct sockaddr_in getPeerAddr(int sockfd);
 
+	int getSocketError(int sockfd);
+
 	int connect(int sockfd,const struct sockaddr_in* addr);
 	ssize_t read(int sockfd,void* buf,size_t count);
 	ssize_t readv(int sockfd,const struct iovec* iov,int iovcnt);

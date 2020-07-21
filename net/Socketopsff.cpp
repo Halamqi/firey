@@ -122,6 +122,15 @@ struct sockaddr_in Socket::getPeerAddr(int sockfd){
 	return peerAddr;
 }
 
+int Socket::getSocketError(int sockfd){
+	int optval=0;
+	socklen_t optlen=static_cast<socklen_t>(sizeof optval);
+	if(::getsockopt(sockfd,SOL_SOCKET,SO_ERROR,&optval,&optlen)<0){
+		return errno;
+	}
+	else return optval;
+}
+
 int Socket::connect(int sockfd,const struct sockaddr_in* addr){
 	return ::connect(sockfd,(struct sockaddr*)addr,static_cast<socklen_t>(sizeof(struct sockaddr_in)));
 }

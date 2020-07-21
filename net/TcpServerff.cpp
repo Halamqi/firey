@@ -2,7 +2,6 @@
 #include "EventLoopff.h"
 #include "Acceptorff.h"
 #include "InetAddressff.h"
-#include "TcpConnectionff.h"
 
 #include <stdio.h>
 
@@ -78,7 +77,8 @@ void TcpServerff::removeConnectionInLoop(const TcpConnectionPtr& conn){
 	(void) n;
 	assert(n==1);
 
-//	EventLoopff* ioLoop=conn->getLoop();
-//	ioLoop->runInLoop(
-//			std::bind(&TcpConnectionff::connectionDestroy,conn));
+	EventLoopff* ioLoop=conn->getLoop();
+	/*KEY!!! use queueInLoop instead of runInLoop*/
+	ioLoop->queueInLoop(
+			std::bind(&TcpConnectionff::connectionDestroy,conn));
 }

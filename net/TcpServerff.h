@@ -2,6 +2,7 @@
 #define FF_SERVER_H_
 
 #include "Callbacksff.h"
+#include "TcpConnectionff.h"
 
 #include <map>
 #include <string>

@@ -13,13 +13,11 @@ public:
 
 	void lock();
 	void unlock();
-	inline pthread_mutex_t* getPthreadMutex(){
+	pthread_mutex_t* getPthreadMutex(){
 		return &mutex_;
 	}
-	bool isHoldByCurrentThread();
 private:
 	pthread_mutex_t mutex_;
-	pid_t holder_;
 
 	void checkError(int);
 };//Mutex

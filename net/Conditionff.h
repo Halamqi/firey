@@ -8,7 +8,7 @@
 namespace firey{
 class Conditionff{
 	public:
-		Conditionff(Mutex& m)
+		Conditionff(Mutexff& m)
 			:mutex_(m)
 		{
 			int ret=pthread_cond_init(&cond_,NULL);

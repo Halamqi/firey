@@ -19,7 +19,7 @@ int main(){
 		threads.push_back(std::move(std::unique_ptr<Threadff>(new Threadff(tfunc1))));
 		threads.back()->start();
 	}
-	sleep(1);
+	sleep(60);
 	printf("creating threads down!\n");
 	return 0;
 }

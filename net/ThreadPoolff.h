@@ -13,7 +13,13 @@
 
 namespace firey
 {
-
+/*线程池中的线程创建过程中函数的调用过程
+ 1.创建线程
+ 2.start()在新建线程中初始化线程的信息
+ 3.执行创建线程是指定的回调函数ThreadPoolff::runInThread()
+ 4.runInThread()-->用户自定义的线程初始化任务threadInitCallback_
+ 5.执行完线程初始化回调函数之后，从线程池的任务队列中取出任务来执行
+ */
 class ThreadPoolff
 {
 	public:

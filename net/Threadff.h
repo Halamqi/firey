@@ -40,6 +40,7 @@ class Threadff
 		pthread_t threadId_;
 		ThreadFunc func_;
 		std::string name_;
+		//等待线程创建完毕之后，再继续运行主线程
 		CountDownLatchff latch_;
 
 		static std::atomic<uint32_t> threadCreated_; 	

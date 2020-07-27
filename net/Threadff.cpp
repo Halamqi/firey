@@ -139,6 +139,7 @@ void Threadff::start()
 		delete data;
 		//TODO LOG_SYSFATAL<<
 	}
+	//等待线程创建完毕，阻塞等待
 	else
 	{
 		latch_.wait();

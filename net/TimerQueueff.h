@@ -48,7 +48,7 @@ class TimerQueueff{
 		void addTimerInLoop(Timerff* timer);
 
 		std::vector<TimerNode> getExpiredTimer(Timestampff now);
-		void reset(std::vector<TimerNode> expired,Timestampff now);
+		void reset(const std::vector<TimerNode>& expired,Timestampff now);
 
 		bool insertTimer(Timerff* timer);
 

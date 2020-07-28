@@ -2,6 +2,7 @@
 #include "EventLoopff.h"
 #include "Acceptorff.h"
 #include "InetAddressff.h"
+#include "EventLoopThreadPoolff.h"
 
 #include <stdio.h>
 
@@ -15,6 +16,10 @@ TcpServerff::TcpServerff(EventLoopff* loop,
 	acceptor_(new Acceptorff(loop,listenAddr,reuseport==kReusePort)),
 	ipPort_(listenAddr.toIpPort()),
 	name_(name),
+	//注意成员初始化顺序
+	//ioThreadPool_必须要在name_之后初始化，因为用到了name_
+	//或者在初始化EventLoopThreadPoolff时不使用name_
+	ioThreadPool_(new EventLoopThreadPoolff(ownerLoop_,name_)),
 	isRuning_(false),
 	nextConnId_(1)
 {
@@ -42,19 +47,21 @@ void TcpServerff::newConnection(int sockfd,const InetAddressff& peerAddr){
 	std::string connName=name_+buf;
 
 	InetAddressff localAddr(Socket::getLocalAddr(sockfd));
-	TcpConnectionPtr conn(new TcpConnectionff(ownerLoop_,connName,sockfd,localAddr,peerAddr));
+	EventLoopff* ioLoop=ioThreadPool_->getNextLoop();
+	TcpConnectionPtr conn(new TcpConnectionff(ioLoop,connName,sockfd,localAddr,peerAddr));
 	connections_[connName]=conn;
 	conn->setConnectionCallback(connectionCallback_);
 	conn->setMessageCallback(messageCallback_);
 	conn->setWriteCompleteCallback(writeCompleteCallback_);
 	conn->setCloseCallback(
 			std::bind(&TcpServerff::removeConnection,this,_1));
-	ownerLoop_->runInLoop(
+	ioLoop->runInLoop(
 			std::bind(&TcpConnectionff::connectionEstablished,conn));
 }
 
 void TcpServerff::start(){
 	if(!isRuning_){
+		ioThreadPool_->start(threadInitCallback_);
 		isRuning_=true;
 		assert(!acceptor_->listening());
 		ownerLoop_->runInLoop(
@@ -81,4 +88,10 @@ void TcpServerff::removeConnectionInLoop(const TcpConnectionPtr& conn){
 	/*KEY!!! use queueInLoop instead of runInLoop*/
 	ioLoop->queueInLoop(
 			std::bind(&TcpConnectionff::connectionDestroy,conn));
+}
+
+//设置线程池的大小
+void TcpServerff::setThreadNum(int threadNum){
+	assert(threadNum>=0);
+	ioThreadPool_->setThreadNum(threadNum);		
 }

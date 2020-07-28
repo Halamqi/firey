@@ -12,10 +12,12 @@ namespace firey{
 class Acceptorff;
 class EventLoopff;
 class InetAddressff;
+class EventLoopThreadPoolff;
 
 class TcpServerff{
 	public:
-
+	
+		typedef std::function<void(EventLoopff*)> ThreadInitCallback;
 		enum Option{
 			kNoReusePort,
 			kReusePort,
@@ -35,6 +37,18 @@ class TcpServerff{
 
 		void start();//start server
 
+		/*对io线程池的操作*/
+		//设置io线程池线程的数量
+		void setThreadNum(int threadNum);
+		//在io线程在loop之前，使用EventLoop完成一些事情
+		void setThreadInitCallback(const ThreadInitCallback& cb){
+			threadInitCallback_=cb;
+		}
+		//获取服务器的io线程池
+		std::shared_ptr<EventLoopThreadPoolff> threadPool(){
+			return ioThreadPool_;
+		}
+
 		//set server callbacks
 		void setConnectionCallback(ConnectionCallback cb){
 			connectionCallback_=std::move(cb);
@@ -50,9 +64,14 @@ class TcpServerff{
 
 	private:
 		EventLoopff* ownerLoop_;
+
 		std::unique_ptr<Acceptorff> acceptor_;
 		const std::string ipPort_;
 		const std::string name_;
+
+		std::shared_ptr<EventLoopThreadPoolff> ioThreadPool_;
+
+		ThreadInitCallback threadInitCallback_;
 
 		ConnectionCallback connectionCallback_;
 		MessageCallback messageCallback_;

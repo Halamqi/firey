@@ -99,7 +99,7 @@ void TimerQueueff::handleTimerfdRead(){
 	reset(expiredTimer,now);
 }
 
-void TimerQueueff::reset(std::vector<TimerQueueff::TimerNode> expired,Timestampff now){
+void TimerQueueff::reset(const std::vector<TimerNode>& expired,Timestampff now){
 	ownerLoop_->assertInLoopThread();
 	
 	for(const auto& it:expired){

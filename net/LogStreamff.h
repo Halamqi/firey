@@ -15,7 +15,7 @@ class FixedBufferff
 
 	public:
 		FixedBufferff(const FixedBufferff&)=delete;
-		FiexedBufferff& operator=(const FixedBufferff&)=delete;
+		FixedBufferff& operator=(const FixedBufferff&)=delete;
 
 		FixedBufferff()
 			:cur_(data_)
@@ -37,7 +37,7 @@ class FixedBufferff
 
 		void append(const char* buf,size_t len)
 		{
-			if(static_cast<size_t> avail()<len) 
+			if(static_cast<size_t> (avail())<len) 
 				len=avail();
 			memcpy(cur_,buf,len);
 			add(len);
@@ -45,19 +45,20 @@ class FixedBufferff
 	private:
 		char data_[SIZE];
 		char* cur_;
-		const char* end() const {return buffer_+sizeof(buffer_);}
+		const char* end() const {return data_+sizeof(data_);}
 
 };//class FixedBuffer
 
 class LogStreamff
 {
 	
+	typedef LogStreamff self;
 	public:
 		typedef FixedBufferff<kSmallBuffer> Buffer;
 		
 		self& operator<<(bool v)
 		{
-			buffer_.append(v?1:0,1);
+			buffer_.append(v?"1":"0",1);
 			return *this;
 		}
 
@@ -121,7 +122,6 @@ class LogStreamff
 		void resetBuffer() {buffer_.reset();}
 
 	private:
-		typedef LogStreamff self;
 		
 		template <typename T>
 		void formatInteger(T);
@@ -141,12 +141,12 @@ class Fmt
 		template <typename T>
 		Fmt(const char* fmt,T val);
 
-		const char* data(){return buf_;}
-		int length(){return length_;}
+		const char* data() const {return buf_;}
+		size_t length() const {return length_;}
 
 	private:
 		char buf_[32];
-		int length_;
+		size_t length_;
 };//class Fmt
 
 inline LogStreamff& operator<<(LogStreamff& s,const Fmt& fmt)

@@ -9,20 +9,36 @@ namespace firey{
 
 
 	namespace CurrentThreadff{	
-		extern __thread int ff_cached_tid;
+		extern __thread int t_cachedTid;
 		extern __thread const char* t_threadName;
-
+		extern __thread char t_tidString[32];
+		extern __thread int t_tidStringLength;
 		pid_t gettid();
 
+		void cacheTid();
+
+		bool isMainThread();
+
 		inline int tid(){
-			if(ff_cached_tid==0){
-				ff_cached_tid=static_cast<int>(gettid());
+			if(__builtin_expect(t_cachedTid==0,0))
+			{
+				cacheTid();
 			}
-			return ff_cached_tid;
+			return t_cachedTid;
 		}
 
 		inline const char* name(){
 			return t_threadName;
+		}
+
+		inline const char* tidString()
+		{
+			return t_tidString;
+		}
+
+		inline int tidStringLength()
+		{
+			return t_tidStringLength;
 		}
 
 	}//namespace CurrentThreadff

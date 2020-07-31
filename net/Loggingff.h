@@ -60,9 +60,9 @@ class Loggerff{
 		Loggerff(SourceFile file,int line,LogLevel level,const char* func);
 		//创建临时Logger对象的源文件和行号,是否要abort()
 		Loggerff(SourceFile file,int line,bool toAbort);
-		~Logger();
+		~Loggerff();
 
-		LogStreaff& stream(){return impl_.stream_;}
+		LogStreamff& stream(){return impl_.stream_;}
 
 		static LogLevel logLevel();
 		static void setLogLevel(LogLevel level);
@@ -94,7 +94,7 @@ class Loggerff{
 };//class Loggingff
 
 extern Loggerff::LogLevel g_logLevel;
-inline Loggerff::logLevel()
+inline Loggerff::LogLevel Loggerff::logLevel()
 {
 	return g_logLevel;
 }
@@ -103,7 +103,7 @@ inline Loggerff::logLevel()
 #define LOG_TRACE if(Loggerff::logLevel()<=Loggerff::TRACE) \
 	Loggerff(__FILE__,__LINE__,Loggerff::TRACE,__func__).stream()
 #define LOG_DEBUG if(Loggerff::LogLevel()<=Loggerff::DEBUG) \
-	loggerff(__FILE__,__LINE__,Loggerff::DEBUG,__func__).stream()
+	Loggerff(__FILE__,__LINE__,Loggerff::DEBUG,__func__).stream()
 #define LOG_INFO if(Loggerff::LogLevel()<=Loggerff::INFO) \
 	Loggerff(__FILE__,__LINE__).stream()
 #define LOG_WARN Loggerff(__FILE__,__LINE__,Loggerff::WARN).stream()

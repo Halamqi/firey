@@ -54,6 +54,11 @@ class LogStreamff
 	
 	typedef LogStreamff self;
 	public:
+		LogStreamff()=default;
+
+		LogStreamff(const LogStreamff&)=delete;
+		LogStreamff& operator=(const LogStreamff&)=delete;
+
 		typedef FixedBufferff<kSmallBuffer> Buffer;
 		
 		self& operator<<(bool v)
@@ -135,6 +140,7 @@ class LogStreamff
 
 };//class LogStreamff
 
+//构造是将val按fmt格式打印到buf_中
 class Fmt
 {
 	public:

@@ -105,6 +105,7 @@ Loggerff::Impl::Impl(LogLevel level,int savedErrno,const SourceFile& file,int li
 	}
 }
 
+//采取了一定的优化措施，来避免在一秒内产生的日志，反复的格式化同样的信息（只重新格式化微秒）
 void Loggerff::Impl::formatTime()
 {
 	int64_t microSecondsSinceEpoch=time_.usSinceEpoch();	
@@ -112,7 +113,7 @@ void Loggerff::Impl::formatTime()
 	time_t seconds=static_cast<time_t>(microSecondsSinceEpoch/Timestampff::kusPerSecond);
 	int microseconds=static_cast<int>(microSecondsSinceEpoch%Timestampff::kusPerSecond);
 
-	//不是在最后一秒内产生的日志
+	//不是在最后一秒内产生的日志,重新格式化秒之前的部分
 	//则更新线程局部存储t_time
 	if(seconds!=t_lastSecond)
 	{
@@ -127,6 +128,7 @@ void Loggerff::Impl::formatTime()
 		assert(len==17);(void)len;
 	}
 
+	//如果在同一秒内，只需要重新格式化微秒部分
 	Fmt us(".%06d ",microseconds);
 	assert(us.length()==8);
 	stream_<<Helper(t_time,17)<<Helper(us.data(),8);

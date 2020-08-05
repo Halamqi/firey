@@ -6,16 +6,14 @@ project(firey C CXX)
 enable_testing()
 
 if(NOT CMAKE_BUILD_TYPE)
-
 	set(CMAKE_BUILD_TYPE "Debug")
-
 endif()
 
 # only build examples if this is the main project
 
 #if(CMAKE_PROJECT_NAME STREQUAL "firey")
 
-#	option(MUDUO_BUILD_EXAMPLES "Build Muduo examples" ON)
+#	option(MUDUO_BUILD_EXAMPLES "Build firey examples" ON)
 
 #endif()
 

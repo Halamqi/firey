@@ -11,6 +11,8 @@ set(net_SRCS
 	Socketopsff.cpp
 	TcpConnectionff.cpp
 	TcpServerff.cpp
+	TimerQueueff.cpp
+	Timerff.cpp
 	)
 
 add_library(firey_net ${net_SRCS})

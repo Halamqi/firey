@@ -15,18 +15,18 @@ void timercb(){
 }
 
 void* threadFunc(void* arg){
-	vector<std::unique_ptr<ffTimer>> timers;
+	vector<std::unique_ptr<Timerff>> timers;
 	for(int i=0;i<10;i++){
-		timers.push_back(unique_ptr<ffTimer>(new ffTimer(timercb,addTime(ffTimestamp::now(),static_cast<double>(i+1)),0.0)));
-		printf("this is in %d:\n",ffCurrentThread::tid());
-		printf("timer created:%lu sequence:%lu\n",ffTimer::timerCreated(),timers[i]->sequence());
+		timers.push_back(unique_ptr<Timerff>(new Timerff(timercb,addTime(Timestampff::now(),static_cast<double>(i+1)),0.0)));
+		printf("this is in %d:\n",CurrentThreadff::tid());
+		printf("timer created:%lu sequence:%lu\n",Timerff::timerCreated(),timers[i]->sequence());
 	}		
 	return NULL;
 }
 
 
 int main(){
-	vector<std::unique_ptr<ffTimer>> timers;
+	vector<std::unique_ptr<Timerff>> timers;
 	pthread_t tid;
 	for(int i=0;i<1;i++){
 		pthread_create(&tid,NULL,threadFunc,NULL);
@@ -34,9 +34,9 @@ int main(){
 	}
 
 	for(int i=0;i<10;i++){
-		timers.push_back(unique_ptr<ffTimer>(new ffTimer(timercb,addTime(ffTimestamp::now(),static_cast<double>(i+1)),0.0)));
-		printf("this is in %d:\n",ffCurrentThread::tid());
-		printf("timer created:%lu sequence:%lu\n",ffTimer::timerCreated(),timers[i]->sequence());
+		timers.push_back(unique_ptr<Timerff>(new Timerff(timercb,addTime(Timestampff::now(),static_cast<double>(i+1)),0.0)));
+		printf("this is in %d:\n",CurrentThreadff::tid());
+		printf("timer created:%lu sequence:%lu\n",Timerff::timerCreated(),timers[i]->sequence());
 	}
 
 	sleep(5);

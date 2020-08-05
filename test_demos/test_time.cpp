@@ -1,16 +1,16 @@
-#include "TimeStampff.h"
+#include "Timestampff.h"
 #include <vector>
 #include <stdio.h>
 
 using namespace firey;
 using namespace std;
 
-void passByConstReference(const ffTimeStamp& x)
+void passByConstReference(const Timestampff& x)
 {
 	printf("%s\n", x.toString().c_str());
 }
 
-void passByValue(ffTimeStamp x)
+void passByValue(Timestampff x)
 {
 	printf("%s\n", x.toString().c_str());
 }
@@ -19,11 +19,11 @@ void benchmark()
 {
 	const int kNumber = 1000*1000;
 
-	std::vector<ffTimeStamp> stamps;
+	std::vector<Timestampff> stamps;
 	stamps.reserve(kNumber);
 	for (int i = 0; i < kNumber; ++i)
 	{
-		stamps.push_back(ffTimeStamp::now());
+		stamps.push_back(Timestampff::now());
 	}
 	printf("%s\n", stamps.front().toString().c_str());
 	printf("%s\n", stamps.back().toString().c_str());
@@ -58,7 +58,7 @@ void benchmark()
 
 int main()
 {
-	ffTimeStamp now(ffTimeStamp::now());
+	Timestampff now(Timestampff::now());
 	printf("%s\n", now.toString().c_str());
 	passByValue(now);
 	passByConstReference(now);

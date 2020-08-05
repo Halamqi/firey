@@ -4,6 +4,7 @@ set(base_SRCS
 	logger/LogFileff.cpp
 	logger/Loggingff.cpp
 	logger/LogStreamff.cpp
+	logger/Timestampff.cpp
 	thread/CountDownLatchff.cpp
 	thread/CurrentThreadff.cpp
 	thread/Mutexff.cpp
@@ -12,7 +13,7 @@ set(base_SRCS
 		)
 
 add_library(firey_base ${base_SRCS})
-target_link_libraries(firey_base rt lpthread)
+target_link_libraries(firey_base rt pthread)
 
 install(TARGETS firey_base DESTINATION lib)
 

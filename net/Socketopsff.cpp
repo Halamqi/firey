@@ -1,9 +1,26 @@
-
 #include "Socketopsff.h"
+
+#include <fcntl.h>
+
+#if VALGRIND || defined (NO_ACCEPT4)
+void setNonBlockingCloseOnExec(int sockfd)
+{
+	int flags=::fcntl(sockfd,F_GETFL,0);
+	flags|=O_NOBLOCK;
+	int ret=::fcntl(sockfd,F_SETFL,flags);
+
+	flags=::fcntl(sockfd,F_GETFD,0);
+	flags|=FD_CLOEXEC;
+	int ret=::fcntl(sockfd,F_SETFD,flags);
+
+	(void)ret;
+}
+#endif
 
 int Socket::createNonblockingOrDie(){
 	int sockfd=::socket(AF_INET,SOCK_STREAM|SOCK_NONBLOCK|SOCK_CLOEXEC,IPPROTO_TCP);
 	if(sockfd<0){
+		//TODO
 		fprintf(stderr,"createNonblokingOrDid()%s",strerror(sockfd));
 		abort();
 	}
@@ -11,9 +28,10 @@ int Socket::createNonblockingOrDie(){
 }
 
 void Socket::bindOrDie(int sockfd,const struct sockaddr_in* addr){
-	int ret=::bind(sockfd,(struct sockaddr*)addr,
+	int ret=::bind(sockfd,reinterpret_cast<const struct sockaddr*>(addr),
 			static_cast<socklen_t>(sizeof(struct sockaddr_in)));
 	if(ret<0){
+		//TODO
 		fprintf(stderr,"bindOrDie(),%s",strerror(ret));
 		abort();
 	}
@@ -22,6 +40,7 @@ void Socket::bindOrDie(int sockfd,const struct sockaddr_in* addr){
 void Socket::listenOrDie(int sockfd){
 	int ret=::listen(sockfd,128);
 	if(ret<0){
+		//TODO
 		fprintf(stderr,"listenOrDie(),%s",strerror(ret));
 		abort();
 	}
@@ -29,8 +48,13 @@ void Socket::listenOrDie(int sockfd){
 
 int Socket::accept(int sockfd,struct sockaddr_in* addr){
 	socklen_t addrlen=static_cast<socklen_t>(sizeof(*addr));
-	int connfd=::accept4(sockfd,(struct sockaddr*)addr,
+#if VALGRIND || defined (NO_ACCEPT4)
+	int connfd=::aceept(sockfd,(struct sockaddr*)addr,&addrlen);
+	setNonBlockingCloseOnExec(connfd);
+#else
+	int connfd=::accept4(sockfd,reinterpret_cast<struct sockaddr*>(addr),
 			&addrlen,SOCK_NONBLOCK|SOCK_CLOEXEC); 
+#endif
 	if(connfd<0){
 		int savedErrno=errno;
 		switch (savedErrno){
@@ -52,11 +76,13 @@ int Socket::accept(int sockfd,struct sockaddr_in* addr){
 			case ENOMEM:
 			case ENOTSOCK:
 			case EOPNOTSUPP:
+		//TODO
 				// unexpected errors
 				fprintf(stderr,"listenOrDie(),%s",strerror(connfd));
 				abort();
 				break;
 			default:
+		//TODO
 				fprintf(stderr,"listenOrDie(),%s",strerror(connfd));
 				abort();
 				break;
@@ -68,6 +94,7 @@ int Socket::accept(int sockfd,struct sockaddr_in* addr){
 void Socket::closeOrDie(int sockfd){
 	int ret=::close(sockfd);
 	if(ret<0){
+		//TODO
 		fprintf(stderr,"listenOrDie(),%s",strerror(ret));
 		abort();
 	}
@@ -80,6 +107,7 @@ void Socket::fromIpPort(const char* ip,uint16_t port,struct sockaddr_in* addr){
 	addr->sin_family=AF_INET;
 	addr->sin_port=htons(port);
 	if(::inet_pton(AF_INET,ip,&addr->sin_addr)<=0){
+		//TODO
 		fprintf(stderr,"fromIpPort()");
 	}
 }
@@ -87,7 +115,8 @@ void Socket::fromIpPort(const char* ip,uint16_t port,struct sockaddr_in* addr){
 void Socket::toIp(char* buf,int size,const struct sockaddr_in* addr){
 	assert(size>=INET_ADDRSTRLEN);
 
-	if(::inet_ntop(AF_INET,&addr->sin_addr,buf,static_cast<socklen_t>(size))<0){
+	if(::inet_ntop(AF_INET,&addr->sin_addr,buf,static_cast<socklen_t>(size))==NULL){
+		//TODO
 		fprintf(stderr,"toIp()");
 	}
 }
@@ -106,7 +135,8 @@ struct sockaddr_in Socket::getLocalAddr(int sockfd){
 	sockaddr_in localaddr;
 	memset(&localaddr,0,sizeof localaddr);
 	socklen_t addrLen=static_cast<socklen_t>(sizeof(localaddr));
-	if(::getsockname(sockfd,(struct sockaddr*)&localaddr,&addrLen)<0){
+	if(::getsockname(sockfd,reinterpret_cast<struct sockaddr*>(&localaddr),&addrLen)<0){
+		//TODO
 		fprintf(stderr,"Socket::getLocalAddr()");
 	}
 	return localaddr;
@@ -116,7 +146,8 @@ struct sockaddr_in Socket::getPeerAddr(int sockfd){
 	sockaddr_in peerAddr;
 	memset(&peerAddr,0,sizeof peerAddr);
 	socklen_t addrLen=static_cast<socklen_t>(sizeof(peerAddr));
-	if(::getpeername(sockfd,(struct sockaddr*)&peerAddr,&addrLen)<0){
+	if(::getpeername(sockfd,reinterpret_cast<struct sockaddr*>(&peerAddr),&addrLen)<0){
+		//TODO
 		fprintf(stderr,"Socket::getLocalAddr()");
 	}
 	return peerAddr;
@@ -126,13 +157,16 @@ int Socket::getSocketError(int sockfd){
 	int optval=0;
 	socklen_t optlen=static_cast<socklen_t>(sizeof optval);
 	if(::getsockopt(sockfd,SOL_SOCKET,SO_ERROR,&optval,&optlen)<0){
+		//TODO
 		return errno;
 	}
 	else return optval;
 }
 
 int Socket::connect(int sockfd,const struct sockaddr_in* addr){
-	return ::connect(sockfd,(struct sockaddr*)addr,static_cast<socklen_t>(sizeof(struct sockaddr_in)));
+	return ::connect(sockfd,
+				 	 reinterpret_cast<const struct sockaddr*>(addr),
+			  	  	 static_cast<socklen_t>(sizeof(struct sockaddr_in)));
 }
 
 ssize_t Socket::read(int sockfd,void* buf,size_t count){

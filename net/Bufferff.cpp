@@ -19,12 +19,12 @@ ssize_t Bufferff::readFd(int fd,int* savedErrno){
 
 	const int iovcnt=(writable<sizeof extrabuf)?2:1;
 
-	const size_t n=Socket::readv(fd,vec,iovcnt);
+	const ssize_t n=Socket::readv(fd,vec,iovcnt);
 
 	if(n<0){
 		*savedErrno=errno;
 	}
-	else if(n<=writable){
+	else if(static_cast<size_t>(n)<=writable){
 		writerIndex_+=n;
 	}
 	else{

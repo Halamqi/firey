@@ -16,6 +16,9 @@ namespace firey{
 class AsyncLoggingff{
 
 	public:
+		AsyncLoggingff(const AsyncLoggingff&)=delete;
+		AsyncLoggingff& operator=(const AsyncLoggingff&)=delete;
+
 		AsyncLoggingff(const std::string& basename,
 					   off_t rollSize,
 					   int flushInterval=3);

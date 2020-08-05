@@ -25,7 +25,7 @@ class Timerff{
 		Timestampff expireTime() const {return expireTime_;}
 		bool isRepeat() const {return isRepeat_;}
 		double interval() const {return interval_;}
-		const uint64_t sequence() const {return sequence_;}
+		uint64_t sequence() const {return sequence_;}
 		
 		//restart a repeat timer
 		void restart(Timestampff now);

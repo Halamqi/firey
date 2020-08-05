@@ -35,7 +35,7 @@ class TcpConnectionff:public std::enable_shared_from_this<TcpConnectionff>
 		bool disconnected() const {return state_==kDisconnected;}
 
 		void send(const std::string& message);
-		void send(const void* message,int len);
+		void send(const void* message,size_t len);
 		void send(Bufferff* buffer);
 			
 		void shutdown();

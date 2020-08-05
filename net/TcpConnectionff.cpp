@@ -57,10 +57,11 @@ TcpConnectionff::~TcpConnectionff(){
 }
 
 void TcpConnectionff::send(const std::string& message){
-	send(static_cast<const char*>(message.data()),message.size());
+	send(static_cast<const char*>(message.data()),
+		 static_cast<size_t>(message.size()));
 }
 
-void TcpConnectionff::send(const void* data,int len){
+void TcpConnectionff::send(const void* data,size_t len){
 	if(state_==kConnected){
 		if(ownerLoop_->isInLoopThread()){
 			sendInLoop(data,len);

@@ -8,7 +8,7 @@ BUILD_TYPE=${BUILD_TYPE:-debug}
 INSTALL_DIR=${INSTALL_DIR:-../${BUILD_TYPE}-install}
 CXX=${CXX:-g++}
 
-ln -sf $BUILD_DIR/$BUILD_TYPE/compile_commands.json
+#ln -sf $BUILD_DIR/$BUILD_TYPE/compile_commands.json
 
 mkdir -p $BUILD_DIR/$BUILD_TYPE \
 	&& cd $BUILD_DIR/$BUILD_TYPE \

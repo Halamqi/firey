@@ -4,6 +4,9 @@
 #include <sys/epoll.h>
 #include <assert.h>
 
+#include <sstream>
+#include <string>
+
 using namespace firey;
 
 const int Channelff::kNoneEvent=0;
@@ -75,4 +78,47 @@ void Channelff::remove(){
 void Channelff::tie(const std::shared_ptr<void>& obj){
 	tie_=obj;
 	tied_=true;
+}
+
+//学习这种设计模式
+std::string Channelff::eventToString()
+{
+	return eventToString(fd_,events_);
+}
+
+std::string Channelff::eventToString(int fd,int event)
+{
+	std::ostringstream oss;
+	oss<<fd<<":";
+	if(event&EPOLLIN)
+	{
+		oss<<"IN ";
+	}
+	if(event&EPOLLPRI)
+	{
+		oss<<"PRI ";
+	}
+	if(event&EPOLLOUT)
+	{
+		oss<<"OUT";
+	}
+	if(event&EPOLLHUP)
+	{
+		oss<<"HUP ";
+	}
+	if(event&EPOLLRDHUP)
+	{
+		oss<<"RDHUP ";
+	}
+	if(event&EPOLLERR)
+	{
+		oss<<"ERR ";
+	}
+#ifdef EPOLLNVAL
+	if(event&EPOLLNVAL)
+	{
+		oss<<"NVAL";
+	}
+#endif
+	return oss.str();
 }

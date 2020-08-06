@@ -7,6 +7,8 @@
 
 #include <string>
 
+struct tcp_info;
+
 namespace firey{
 
 class Channelff;
@@ -39,10 +41,15 @@ class TcpConnectionff:public std::enable_shared_from_this<TcpConnectionff>
 		void send(Bufferff* buffer);
 			
 		void shutdown();
+		void forceClose();
+		void forceCloseWithDelay(double);
 
 		void startRead();
 		void stopRead();
 		bool isReading() const {return reading_;}
+
+		bool getTcpInfo(struct tcp_info* tcpi) const;
+		std::string getTcpInfoString() const;
 
 		//don't use move ,beacuse other connection need tcpserver's callback
 		void setConnectionCallback(const ConnectionCallback& cb){
@@ -71,8 +78,13 @@ class TcpConnectionff:public std::enable_shared_from_this<TcpConnectionff>
 
 	private:
 
-		enum ConnState{kDisconnected,kConnecting,kConnected,kDisconnecting};
-
+		enum ConnState{
+			kDisconnected,
+			kConnecting,
+			kConnected,
+			kDisconnecting
+		};
+		
 		EventLoopff* ownerLoop_;
 		const std::string name_;
 		const InetAddressff localAddr_;
@@ -94,6 +106,9 @@ class TcpConnectionff:public std::enable_shared_from_this<TcpConnectionff>
 
 		CloseCallback closeCallback_;
 
+		void shutdownInLoop();
+		void forceCloseInLoop();
+
 		void handleRead(Timestampff reveiveTime);
 		void handleWrite();
 		void handleError();
@@ -102,13 +117,11 @@ class TcpConnectionff:public std::enable_shared_from_this<TcpConnectionff>
 //		void sendInLoop(const std::string& message);
 		void sendInLoop(const void* message,size_t len);
 		
-		void shutdownInLoop();
-
 		void startReadInLoop();
 		void stopReadInLoop();
 
 		void setState(ConnState s){state_=s;}
-		const std::string& stateToString() const;
+		const char* stateToString() const;
 
 		Bufferff inputBuffer_;
 		Bufferff outputBuffer_;

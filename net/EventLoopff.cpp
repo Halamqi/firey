@@ -4,6 +4,7 @@
 #include "MutexGuardff.h"
 #include "TimerQueueff.h"
 #include "Timestampff.h"
+#include "Loggingff.h"
 
 #include <assert.h>
 #include <poll.h>
@@ -16,12 +17,17 @@ using namespace firey;
 __thread EventLoopff* t_loopInThisThread=nullptr;
 
 void EventLoopff::abortNotInLoopThread(){
-	assert(isInLoopThread());
+	LOG_FATAL<<"EventLoop::abortNotInLoopThread() - EventLoop: "<<this
+		<<" was created int threadId_ = "<<threadId_
+		<<", current thread id = "<<CurrentThreadff::tid();
 }
 
 int createEventFd(){
 	int evfd=::eventfd(0,EFD_CLOEXEC|EFD_NONBLOCK);
-	if(evfd<0) abort();
+	if(evfd<0)
+	{
+		LOG_SYSFATAL<<"Failed in create eventfd";
+	}
 	return evfd;
 }
 
@@ -44,7 +50,12 @@ EventLoopff::EventLoopff()
 	wakeupChannel_(new Channelff(this,wakeupFd_)),
 	timerQueue_(new TimerQueueff(this))	
 {
-	assert(!t_loopInThisThread);
+	LOG_DEBUG<<"EventLoop created "<<this<<" in thread "<<threadId_;
+	if(t_loopInThisThread)
+	{
+		LOG_FATAL<<"Another EventLoop "<<t_loopInThisThread
+			<<" exists in this thread "<<threadId_;
+	}
 	t_loopInThisThread=this;
 
 	wakeupChannel_->setReadCallback(
@@ -53,6 +64,8 @@ EventLoopff::EventLoopff()
 }
 
 EventLoopff::~EventLoopff(){
+	LOG_DEBUG<<"EventLoop "<<this<<" of thread "<<threadId_
+		<<" destructs in thread "<<CurrentThreadff::tid();
 	assert(!looping_);
 	wakeupChannel_->disableAll();
 	wakeupChannel_->remove();
@@ -64,7 +77,10 @@ void EventLoopff::loop(){
 	assert(!looping_);
 	assertInLoopThread();
 	looping_=true;
-	while(!quit_){
+
+	LOG_TRACE<<"EventLoop "<<this<<" start looping";
+	while(!quit_)
+	{
 		activeChannels_.clear();
 		pollReturnTime_=poller_->poll(kPollWaitTime,&activeChannels_);
 		
@@ -76,15 +92,20 @@ void EventLoopff::loop(){
 		
 		doPendingFunctors();
 	}
+	LOG_TRACE<<"EventLoop "<<this<<" stop looping";
 	looping_=false;
-
 }
 
 void EventLoopff::quit(){
 	assert(!quit_);
 	quit_=true;
+	if(!isInLoopThread())
+	{
+		wakeup();
+	}
 }
 
+//channel的管理
 void EventLoopff::updateChannel(Channelff* channel){
 	assert(channel->ownerLoop()==this);
 	assert(isInLoopThread());
@@ -95,7 +116,7 @@ void EventLoopff::removeChannel(Channelff* channel){
 	assert(channel->ownerLoop()==this);
 	assert(isInLoopThread());
 	//if(EventHandling_){
-		
+			
 	//}
 	poller_->removeChannel(channel);
 }
@@ -106,6 +127,7 @@ bool EventLoopff::hasChannel(Channelff* channel){
 	return poller_->hasChannel(channel);
 }
 
+//让某一线程执行某一任务
 void EventLoopff::runInLoop(Functor cb){
 	if(isInLoopThread()) cb();
 	else{
@@ -113,6 +135,7 @@ void EventLoopff::runInLoop(Functor cb){
 	}
 }
 
+//将任务调度到其他线程中执行
 void EventLoopff::queueInLoop(Functor cb){
 	{
 		MutexGuardff lock(mutex_);
@@ -124,7 +147,7 @@ void EventLoopff::queueInLoop(Functor cb){
 	}
 }
 
-
+//执行消息队列中的回调
 void EventLoopff::doPendingFunctors(){
 	assertInLoopThread();
 	callingPendingFunctors_=true;
@@ -139,11 +162,12 @@ void EventLoopff::doPendingFunctors(){
 	callingPendingFunctors_=false;
 }
 
+//唤醒线程和读取wakeupFd_
 void EventLoopff:: wakeup(){
 	uint64_t tick=1;
 	ssize_t n=::write(wakeupFd_,&tick,sizeof tick);
 	if(n!=sizeof tick){
-		fprintf(stderr,"EventLoopff::wakeup() wakeup failed\n");
+		LOG_ERROR<<"EventLoop::wakeup() writes "<<n<<" bytes instead of 8";
 	}
 }
 
@@ -151,10 +175,11 @@ void EventLoopff::handleWakeupRead(){
 	uint64_t tick=1;
 	ssize_t n=::read(wakeupFd_,&tick,sizeof tick);
 	if(n!=sizeof tick){
-		fprintf(stderr,"EventLoopff::wakeup() wakeup failed\n");
+		LOG_ERROR<<"EventLoop::wakeup() reads "<<n<<" bytes instead of 8";
 	}
 }
 
+//定时器的用户接口
 TimerIdff EventLoopff::runAt(Timestampff when,timerCallback cb){
 	return timerQueue_->addTimer(std::move(cb),when,0.0);
 }
@@ -172,3 +197,5 @@ TimerIdff EventLoopff::runEvery(double interval,timerCallback cb){
 void EventLoopff::cancel(TimerIdff timer){
 	timerQueue_->cancel(timer);
 }
+
+

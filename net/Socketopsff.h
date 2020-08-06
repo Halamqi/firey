@@ -3,12 +3,8 @@
 
 #include <sys/socket.h>
 
-#include <stdio.h>
 #include <arpa/inet.h>
-#include <string.h>
 #include <unistd.h>
-#include <string>
-#include <assert.h>
 
 namespace Socket{
 	int createNonblockingOrDie();
@@ -25,9 +21,9 @@ namespace Socket{
 
 	void fromIpPort(const char* ip,uint16_t port,struct sockaddr_in* addr);
 
-	void toIp(char* buf,int size,const struct sockaddr_in* addr);
+	void toIp(char* buf,size_t size,const struct sockaddr_in* addr);
 	
-	void toIpPort(char* buf,int size,const struct sockaddr_in* addr);
+	void toIpPort(char* buf,size_t size,const struct sockaddr_in* addr);
 
 	struct sockaddr_in getLocalAddr(int sockfd);
 

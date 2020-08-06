@@ -10,7 +10,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # only build examples if this is the main project
-
+#只有这个是主项目时，才编译例子
 if(CMAKE_PROJECT_NAME STREQUAL "firey")
 	option(FIREY_BUILD_EXAMPLES "Build firey examples" ON)
 endif()
@@ -60,6 +60,7 @@ include_directories(${PROJECT_SOURCE_DIR}/base/logger ${PROJECT_SOURCE_DIR}/base
 string(TOUPPER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
 message(STATUS "CXX_FLAGS = " ${CMAKE_CXX_FLAGS} " " ${CMAKE_CXX_FLAGS_${BUILD_TYPE}})
 
+#当有FIREY_BUILD_EXAMPLES时，才编译例子
 if(FIREY_BUILD_EXAMPLES)
 	add_subdirectory(./test_demos)
 endif()

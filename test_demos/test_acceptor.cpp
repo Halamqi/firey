@@ -3,6 +3,7 @@
 #include "InetAddressff.h"
 
 #include <string>
+#include <assert.h>
 
 using namespace firey;
 

@@ -1,5 +1,6 @@
 #include "Threadff.h"
 #include "CurrentThreadff.h"
+#include "Loggingff.h"
 
 #include <assert.h>
 #include <unistd.h>
@@ -93,6 +94,9 @@ void* startThread(void* arg)
 	//在线程中执行线程数据中的runInThread-->进而执行用户设置好的回调函数func_
 	data->runInThread();
 	delete data;
+	LOG_DEBUG<<"thread tid:"<<CurrentThreadff::tid()
+			 <<", name:"<<CurrentThreadff::name()
+			 <<"exit";
 	return nullptr;
 }
 
@@ -137,7 +141,7 @@ void Threadff::start()
 	{
 		started_=false;
 		delete data;
-		//TODO LOG_SYSFATAL<<
+		LOG_SYSFATAL<<"Failed in pthread_create";
 	}
 	//等待线程创建完毕，阻塞等待
 	else

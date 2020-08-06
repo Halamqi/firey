@@ -3,6 +3,7 @@
 #include "Acceptorff.h"
 #include "InetAddressff.h"
 #include "EventLoopThreadPoolff.h"
+#include "Loggingff.h"
 
 #include <stdio.h>
 
@@ -24,12 +25,13 @@ TcpServerff::TcpServerff(EventLoopff* loop,
 	nextConnId_(1)
 {
 	acceptor_->setNewConnectionCallback(
-			std::bind(&TcpServerff::newConnection,this,_1,_2));		
+			std::bind(&TcpServerff::newConnection,this,_1,_2));
+	LOG_DEBUG<<"TcpServerff::TcpServerff() ["<<name_<<"] constructing";
 }
 
 TcpServerff::~TcpServerff(){
 	ownerLoop_->assertInLoopThread();
-
+	LOG_TRACE<<"TcpServerff::~TcpServerff() ["<<name_<<"] destructing";
 	for(auto& item:connections_){
 		TcpConnectionPtr conn(item.second);
 		item.second.reset();
@@ -46,9 +48,18 @@ void TcpServerff::newConnection(int sockfd,const InetAddressff& peerAddr){
 	nextConnId_++;
 	std::string connName=name_+buf;
 
+	LOG_INFO<<"TcpServer::newConnection() ["<<name_
+		<<"] - new connection ["<<connName
+		<<"] from "<<peerAddr.toIpPort();
+
+	//新的TCP连接到来，接受并分发到IO线程池中
 	InetAddressff localAddr(Socket::getLocalAddr(sockfd));
 	EventLoopff* ioLoop=ioThreadPool_->getNextLoop();
-	TcpConnectionPtr conn(new TcpConnectionff(ioLoop,connName,sockfd,localAddr,peerAddr));
+	TcpConnectionPtr conn(new TcpConnectionff(ioLoop,
+									          connName,
+											  sockfd,
+											  localAddr,
+											  peerAddr));
 	connections_[connName]=conn;
 	conn->setConnectionCallback(connectionCallback_);
 	conn->setMessageCallback(messageCallback_);
@@ -67,7 +78,8 @@ void TcpServerff::start(){
 		ownerLoop_->runInLoop(
 				std::bind(&Acceptorff::listen,acceptor_.get()));
 	}
-		
+	LOG_DEBUG<<"Server ["<<name_<<"] is started"
+		<<(ioThreadPool_->threadNum()>0?" with a iothreadpool":"");
 }
 
 void TcpServerff::removeConnection(const TcpConnectionPtr& conn){
@@ -78,7 +90,8 @@ void TcpServerff::removeConnection(const TcpConnectionPtr& conn){
 void TcpServerff::removeConnectionInLoop(const TcpConnectionPtr& conn){
 	ownerLoop_->assertInLoopThread();
 
-	//TODO
+	LOG_INFO<<"TcpServerff::removeConnectionInLoop() ["<<name_
+		<<"] - connection"<<conn->name();
 
 	size_t n=connections_.erase(conn->name());
 	(void) n;

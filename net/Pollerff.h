@@ -44,6 +44,7 @@ class Pollerff{
 
 		int epollFd_;
 
+		const char* operationToString(int op);
 };//class Pollerff
 }//namespace firey
 #endif //FF_POLLER_H_

@@ -58,6 +58,10 @@ class Channelff
 		bool isWriting(){return events_==kWriteEvent;}
 
 		void tie(const std::shared_ptr<void>& obj);
+
+		std::string eventToString();
+		
+		std::string eventToString(int fd,int event);
 	public:
 		void handleEvent(Timestampff receiveTime);
 		void update();

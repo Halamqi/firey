@@ -5,6 +5,7 @@
 #include "Timerff.h"
 #include "TimerIdff.h"
 #include "Callbacksff.h"
+#include "Loggingff.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -16,7 +17,10 @@ using namespace firey;
 
 int createTimerfd(){
 	int timerfd=::timerfd_create(CLOCK_MONOTONIC,TFD_NONBLOCK|TFD_CLOEXEC);
-	if(timerfd<0) abort();
+	if(timerfd<0)
+	{
+		LOG_SYSFATAL<<"Failed in timerfd_create";
+	}
 	return timerfd;
 }
 
@@ -43,15 +47,16 @@ void resetTimerfd(int timerfd,Timestampff when){
 
 	int ret=::timerfd_settime(timerfd,0,&newValue,&oldValue);
 	if(ret){
-		fprintf(stderr,"resetTimerfd %s,%s,%d,%s",__FILE__,__func__,__LINE__,strerror(ret));
+		LOG_SYSERR<<"timerfd_settime()";
 	}
 }
 
 void readTimerfd(int timerfd,Timestampff now){
 	uint64_t howmany;
 	ssize_t n=::read(timerfd,&howmany,sizeof howmany);
+	LOG_TRACE<<"TimerQueueff::handleRead() "<<howmany<<" at "<<now.toString();
 	if(n!=sizeof howmany){
-		fprintf(stderr,"TimerQueue::handleRead() reads %d bytes instead of 8",static_cast<int>(n));
+		LOG_ERROR<<"TimerQueueff::handleRead() reads "<<n<<" bytes instead of 8";
 	}
 }
 

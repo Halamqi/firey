@@ -1,8 +1,11 @@
 #include "Acceptorff.h"
+
 #include "EventLoopff.h"
 #include "InetAddressff.h"
+#include "Loggingff.h"
 
-#include "fcntl.h"
+#include <fcntl.h>
+#include <assert.h>
 
 using namespace firey;
 
@@ -47,7 +50,8 @@ void Acceptorff::handleRead(){
 		else Socket::closeOrDie(connfd);
 	}
 	else{
-		fprintf(stderr,"Acceptorff::handleRead()");
+		LOG_SYSERR<<"in Acceptor::handleRead()";
+		//处理文件描述数达到上限的问题
 		if(errno==EMFILE){
 			::close(idleFd_);
 			idleFd_=::accept(acceptSocket_.fd(),NULL,NULL);

@@ -24,6 +24,7 @@ class EventLoopThreadPoolff{
 
 		void setThreadNum(int numThread){numThreads_=numThread;}
 		void start(const ThreadInitCallback& cb=ThreadInitCallback());
+		int threadNum() const{return numThreads_;} 
 
 		EventLoopff* getNextLoop();
 

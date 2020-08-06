@@ -1,22 +1,19 @@
 #include "TcpConnectionff.h"
+
 #include "EventLoopff.h"
 #include "Socketff.h"
 #include "Channelff.h"
 #include "Socketopsff.h"
-
-//#include "Bufferff.h"
+#include "Loggingff.h"
 
 #include <string.h>
-#include <stdio.h>
 
 using namespace firey;
 
 void defaultConnectionCallback(const TcpConnectionPtr& conn){
-	printf("%s -> %s is %s",conn->localAddr().toIpPort().c_str(),
-							conn->peerAddr().toIpPort().c_str(),
-							(conn->connected()?"UP":"DOWN"));
-	const char* buf="Hello , there is firey server!\n";
-	conn->send(buf,sizeof(buf));
+	LOG_TRACE<<conn->localAddr().toIpPort()<<" -> "
+		<<conn->peerAddr().toIpPort()<<" is "
+		<<(conn->connected()?"UP":"DOWN");
 }
 
 void defaultMessageCallback(const TcpConnectionPtr& conn,
@@ -48,14 +45,20 @@ TcpConnectionff::TcpConnectionff(EventLoopff* loop,
 			std::bind(&TcpConnectionff::handleClose,this));
 	connChannel_->setErrorCallback(
 			std::bind(&TcpConnectionff::handleError,this));
+	LOG_DEBUG<<"TcpConnectionff::ctor["<<name_<<"] at "
+		<<this<<" fd = "<<sockfd;
 	connSocket_->setTcpKeepAlive(true);
 }
 
 TcpConnectionff::~TcpConnectionff(){
-	//LOG TODO
+	LOG_DEBUG<<"TcpConnectionff::dtor["<<name_<<"] at "
+		<<this
+		<<"fd = "<<connSocket_->fd()
+		<<" state = "<<stateToString();
 	assert(state_==kDisconnected);
 }
 
+//TCP写数据-----------------------------------------------------------------------
 void TcpConnectionff::send(const std::string& message){
 	send(static_cast<const char*>(message.data()),
 		 static_cast<size_t>(message.size()));
@@ -68,7 +71,7 @@ void TcpConnectionff::send(const void* data,size_t len){
 		}
 		else{
 			ownerLoop_->runInLoop(
-					std::bind(&TcpConnectionff::sendInLoop,shared_from_this().get(),
+					std::bind(&TcpConnectionff::sendInLoop,this,
 								data,len));
 		}
 	}
@@ -82,13 +85,14 @@ void TcpConnectionff::send(Bufferff* buff){
 		}
 		else{
 			ownerLoop_->runInLoop(
-					std::bind(&TcpConnectionff::sendInLoop,shared_from_this().get(),
+					std::bind(&TcpConnectionff::sendInLoop,this,
 								buff->peek(),buff->readableBytes()));
 			buff->retrieveAll();
 		}
 	}
 }
 
+//所有的send最终调用的函数
 void TcpConnectionff::sendInLoop(const void* data,size_t len){
 	ownerLoop_->assertInLoopThread();
 
@@ -97,6 +101,7 @@ void TcpConnectionff::sendInLoop(const void* data,size_t len){
 	bool faultError=false;
 
 	if(state_==kDisconnected){
+		LOG_WARN<<"disconnected, give up writting";
 		return;
 	}
 
@@ -111,6 +116,7 @@ void TcpConnectionff::sendInLoop(const void* data,size_t len){
 		else{//nwite<0
 			nwrite=0;
 			if(errno!=EWOULDBLOCK&&errno!=EAGAIN){
+				LOG_SYSERR<<"TcpConnectionff::sendInLoop()";
 				if(errno==EPIPE||errno==ECONNRESET){
 					faultError=true;
 				}
@@ -133,6 +139,58 @@ void TcpConnectionff::sendInLoop(const void* data,size_t len){
 		}
 	}
 }
+//TCP写数据---------------------------------------------------------------------------------------------
+
+//关闭写端
+void  TcpConnectionff::shutdown()
+{
+	if(state_==kConnected)
+	{
+		setState(kDisconnecting);
+		ownerLoop_->runInLoop(
+				std::bind(&TcpConnectionff::shutdownInLoop,this));
+	}
+}
+void TcpConnectionff::shutdownInLoop()
+{
+	ownerLoop_->assertInLoopThread();
+	//当没有关注可写事件时才关闭写端
+	if(!connChannel_->isWriting())
+	{
+		connSocket_->shutdown();
+	}
+}
+
+//主动关闭连接
+void TcpConnectionff::forceClose()
+{
+	if(state_==kConnected||state_==kDisconnecting)
+	{
+		setState(kDisconnecting);
+		ownerLoop_->runInLoop(
+				std::bind(&TcpConnectionff::forceCloseInLoop,shared_from_this()));//FIXME shared_from_this()??
+	}
+}
+
+void TcpConnectionff::forceCloseWithDelay(double seconds)
+{
+	if(state_==kConnected||state_==kDisconnecting)
+	{
+		setState(kDisconnecting);
+		ownerLoop_->runAfter(seconds,
+				std::bind(&TcpConnectionff::forceClose,shared_from_this()));//??
+	}
+}
+
+void TcpConnectionff::forceCloseInLoop()
+{
+	ownerLoop_->assertInLoopThread();
+	if(state_==kConnected||state_==kDisconnecting)
+	{
+		handleClose();
+	}
+}
+
 
 //开始读
 void  TcpConnectionff::startRead(){
@@ -165,6 +223,7 @@ void TcpConnectionff::stopReadInLoop(){
 	}
 }
 
+//连接建立成功
 void TcpConnectionff::connectionEstablished(){
 	ownerLoop_->assertInLoopThread();
 
@@ -178,6 +237,7 @@ void TcpConnectionff::connectionEstablished(){
 	connectionCallback_(shared_from_this());
 }
 
+//彻底断开连接
 void TcpConnectionff::connectionDestroy(){
 	ownerLoop_->assertInLoopThread();
 
@@ -190,6 +250,7 @@ void TcpConnectionff::connectionDestroy(){
 	connChannel_->remove();
 }
 
+//处理读事件
 void TcpConnectionff::handleRead(Timestampff receiveTime){
 	ownerLoop_->assertInLoopThread();
 
@@ -204,10 +265,12 @@ void TcpConnectionff::handleRead(Timestampff receiveTime){
 	}
 	else {
 		errno=saveErrno;
+		LOG_SYSERR<<"TcpConnectionff::handleRead()";
 		handleError();
 	}
 }
 
+//处理写事件
 void TcpConnectionff::handleWrite(){
 	ownerLoop_->assertInLoopThread();
 
@@ -223,22 +286,24 @@ void TcpConnectionff::handleWrite(){
 					ownerLoop_->queueInLoop(std::bind(writeCompleteCallback_,shared_from_this()));
 				}
 				if(state_==kDisconnecting){
-					//TODO
+					shutdownInLoop();
 				}
 			}
 		}
 		else {
-			//TODO LOG_SYSERR<<
+			LOG_SYSERR<<"TcpConnectionff::handleWrite()";
 		}
 	}
 	else {
-		//TODO LOG_TRACE<<
+		LOG_TRACE<<"Connection fd = "<<connChannel_->fd()
+			<<"write is down, no more writing";
 	}
 }
 
+//处理关闭连接事件
 void TcpConnectionff::handleClose(){
 	ownerLoop_->assertInLoopThread();
-	//TODO LOG_TRACE<<
+	LOG_TRACE<<"fd = "<<connChannel_->fd()<<" state = "<<stateToString();
 	assert(state_==kConnected||state_==kDisconnecting);
 	setState(kDisconnected);
 	connChannel_->disableAll();
@@ -249,8 +314,40 @@ void TcpConnectionff::handleClose(){
 	closeCallback_(guardThis);
 }
 
+//处理错误事件
 void TcpConnectionff::handleError(){
 	int err=Socket::getSocketError(connChannel_->fd());
-	//TODO LOG_ERROR<
-	fprintf(stderr,"TcpConnectionff::handleError(),%s",strerror(err));
+	LOG_ERROR<<"TcpConnectionff::handleError() ["<<name_
+		<<"] - SO_ERROR"<<err<<" "<<strerror_tl(err);
+}
+
+
+const char* TcpConnectionff::stateToString() const
+{
+	switch (state_)
+	{
+		case kDisconnected:
+			return "Disconnected";
+		case kConnecting:
+			return "Connecting";
+		case kConnected:
+			return "Connected";
+		case kDisconnecting:
+			return "Disconnecting";
+		default:
+			return "unkown state";
+	}
+}
+
+bool TcpConnectionff::getTcpInfo(struct tcp_info* tcpi) const
+{
+	return connSocket_->getTcpInfo(tcpi);
+}
+
+std::string TcpConnectionff::getTcpInfoString() const
+{
+	char buf[1024];
+	buf[0]='\0';
+	connSocket_->getTcpInfoString(buf,sizeof buf);
+	return buf;
 }

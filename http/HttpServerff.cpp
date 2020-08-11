@@ -1,6 +1,7 @@
 #include "HttpServerff.h"
 
 #include "EventLoopff.h"
+#include "Loggingff.h"
 #include "HttpContextff.h"
 #include "HttpRequestff.h"
 #include "HttpResponseff.h"
@@ -8,7 +9,7 @@
 namespace firey{
 	void defaultHttpCallback(const HttpRequestff& req,HttpResponseff* resp)
 	{
-		resp->setStatus(HttpResponseff::k404NotFound);
+		resp->setStatusCode(HttpResponseff::k404NotFound);
 		resp->setStatusMessage("Not Found");
 		resp->setCloseConnection(true);
 	}
@@ -31,7 +32,7 @@ HttpServerff::HttpServerff(EventLoopff* loop,
 
 void HttpServerff::start()
 {
-	LOG_WARN<<"HttpServer ["<<server_.name()
+	LOG_WARN<<"HttpServer ["<<server_.serverName()
 		<<"] starts listenning on "<<server_.ipPort();
 	server_.start();
 }
@@ -54,7 +55,7 @@ void HttpServerff::onMessage(const TcpConnectionPtr& conn,
 	//如果请求体出错
 	if(!context->parseRequest(buffer,receiveTime))
 	{
-		conn-send("HTTP/1.1 400 Bad Request\r\n\r\n");
+		conn->send("HTTP/1.1 400 Bad Request\r\n\r\n");
 		conn->shutdown();
 	}
 	if(context->gotAll())
@@ -73,7 +74,7 @@ void HttpServerff::onRequest(const TcpConnectionPtr& conn,
 	bool close=connection=="close"||
 			   (request.getVersion()==HttpRequestff::kHttp10&&connection!="Keep-Alive");
 	//根据长连接和短连接的不同，来对HTTP请求进行应答
-	HttpResponse response(close);
+	HttpResponseff response(close);
 
 	//用户设置的回调，也就是这个Http服务器，具有哪些功能
 	httpCallback_(request,&response);

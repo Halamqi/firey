@@ -1,5 +1,8 @@
 #include "HttpContextff.h"
+
 #include "Bufferff.h"
+
+using namespace firey;
 
 bool HttpContextff::processRequestLine(const char* begin,const char* end)
 {
@@ -30,15 +33,15 @@ bool HttpContextff::processRequestLine(const char* begin,const char* end)
 			{
 				if(std::equal(end-3,end-1,"1.0"))
 				{
-					request_.setVersion(HttpRequest::kHttp10);
+					request_.setVersion(HttpRequestff::kHttp10);
 				}
 				else if(std::equal(end-3,end-1,"1.1"))
 				{
-					request_.setVersion(HttpRequest::kHttp11);
+					request_.setVersion(HttpRequestff::kHttp11);
 				}
 				else if(std::equal(end-3,end-1,"2.0"))
 				{
-					request_.setVersion(HttpRequest::kHttp20);
+					request_.setVersion(HttpRequestff::kHttp20);
 				}
 				else succeed=false;
 			}
@@ -47,7 +50,7 @@ bool HttpContextff::processRequestLine(const char* begin,const char* end)
 	return succeed;
 }
 
-bool HttpContextff::parseRequest(Buffer* buffer,Timestampff receiveTime)
+bool HttpContextff::parseRequest(Bufferff* buffer,Timestampff receiveTime)
 {
 	bool ok=true;
 	bool hasMore=true;
@@ -65,7 +68,7 @@ bool HttpContextff::parseRequest(Buffer* buffer,Timestampff receiveTime)
 				{
 					request_.setReceiveTime(receiveTime);
 					buffer->retrieveUntil(crlf+2);
-					state_=kexpectHeaders;
+					state_=kExpectHeaders;
 				}
 				else hasMore=false;
 			}
@@ -75,7 +78,7 @@ bool HttpContextff::parseRequest(Buffer* buffer,Timestampff receiveTime)
 			}
 		}
 
-		else if(state_==kExpectHeads)
+		else if(state_==kExpectHeaders)
 		{
 			const char* crlf=buffer->findCRLF();
 			if(crlf)
@@ -83,7 +86,7 @@ bool HttpContextff::parseRequest(Buffer* buffer,Timestampff receiveTime)
 				const char* colon=std::find(buffer->peek(),crlf,':');
 				if(colon!=crlf)
 				{
-					request_.setHeader(buffer->peek(),colon,crlf);
+					request_.addHeader(buffer->peek(),colon,crlf);
 				}
 				else
 				{

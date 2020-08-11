@@ -7,6 +7,8 @@
 
 #include <string>
 
+#include <boost/any.hpp>
+
 struct tcp_info;
 
 namespace firey{
@@ -76,6 +78,21 @@ class TcpConnectionff:public std::enable_shared_from_this<TcpConnectionff>
 		void connectionEstablished();
 		void connectionDestroy();
 
+		void setContext(const boost::any& context)
+		{
+			context_=context;
+		}
+
+		const boost::any& getContext() const
+		{
+			return context_;
+		}
+
+		boost::any* getMutableContext()
+		{
+			return &context_;
+		}
+
 	private:
 
 		enum ConnState{
@@ -126,6 +143,7 @@ class TcpConnectionff:public std::enable_shared_from_this<TcpConnectionff>
 		Bufferff inputBuffer_;
 		Bufferff outputBuffer_;
 
+		boost::any context_;
 };//class TcpConnectionff
 
 }//namespace firey

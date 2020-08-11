@@ -39,7 +39,7 @@ class HttpServerff{
 					   Bufferff* buffer,
 					   Timestampff receiveTime);
 		//处理http请求
-		void onRequest(const TcpConnecionPtr&,const HttpRequest&);
+		void onRequest(const TcpConnectionPtr&,const HttpRequestff&);
 		
 		TcpServerff server_;
 		//http服务器最主要的逻辑

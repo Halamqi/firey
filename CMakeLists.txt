@@ -55,7 +55,15 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 
-include_directories(${PROJECT_SOURCE_DIR}/base/logger ${PROJECT_SOURCE_DIR}/base/thread ${PROJECT_SOURCE_DIR}/net)
+#连接boost库
+find_package(Boost REQUIRED)
+find_library(BOOSTTEST_LIBRARY NAMES boost_unit_test_framework)
+find_library(BOOSTPO_LIBRARY NAMES boost_program_options)
+find_library(BOOSTSYSTEM_LIBRARY NAMES boost_system)
+#添加boost头文件搜索路径
+include_directories(${Boost_INCLUDE_DIRS})
+#添加其他头文件的搜索路径
+include_directories(${PROJECT_SOURCE_DIR}/base/logger ${PROJECT_SOURCE_DIR}/base/thread ${PROJECT_SOURCE_DIR}/net ${PROJECT_SOURCE_DIR}/http)
 
 string(TOUPPER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
 message(STATUS "CXX_FLAGS = " ${CMAKE_CXX_FLAGS} " " ${CMAKE_CXX_FLAGS_${BUILD_TYPE}})
@@ -67,4 +75,4 @@ endif()
 
 add_subdirectory(./base)
 add_subdirectory(./net)
-
+add_subdirectory(./http)

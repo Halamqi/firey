@@ -19,13 +19,13 @@ class HttpResponseff{
 			k500InternalError=500
 		};
 		
-		enum Version
+		/*enum Version
 		{
 			kUnknown,
 			kHttp10,
 			kHttp11,
 			kHttp20
-		};
+		};*/
 
 		explicit HttpResponseff(bool close)
 			:statusCode_(kUnknown),

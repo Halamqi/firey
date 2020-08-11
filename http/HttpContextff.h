@@ -17,7 +17,7 @@ class HttpContextff{
 			kGotAll
 		};//enum HttpRequestParseState
 
-		HttpContext()
+		HttpContextff()
 			:state_(kExpectRequestLine)
 		{
 		}
@@ -35,10 +35,10 @@ class HttpContextff{
 			request_.swap(dummy);
 		}
 
-		const HttpRequest& request() const
+		const HttpRequestff& request() const
 		{return request_;}
 
-		HttpRequest& request()
+		HttpRequestff& request()
 		{return request_;}
 
 	private:

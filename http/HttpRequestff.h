@@ -37,7 +37,7 @@ class HttpRequestff{
 
 		void setVersion(Version v)
 		{
-			version_(v);
+			version_=v;
 		}
 
 		Version getVersion() const
@@ -49,15 +49,22 @@ class HttpRequestff{
 			std::string method(start,end);
 			if(method=="GET")
 				method_=kGet;
+			
 			else if(method=="POST")
 				method_=kPost;
+			
 			else if(method=="HEAD")
 				method_=kHead;
+			
 			else if(method=="PUT")
 				method_=kPut;
+			
 			else if(method=="DELETE")
 				method_=kDelete;
+			
 			else method_=kInvalid;
+
+			return method_!=kInvalid;
 		}
 
 		Method getMethod()
@@ -122,7 +129,7 @@ class HttpRequestff{
 				++colon;
 			}
 
-			string value(colon,end);
+			std::string value(colon,end);
 			while(!value.empty()&&isspace(value[value.size()-1]))
 			{
 				value.resize(value.size()-1);
@@ -144,7 +151,7 @@ class HttpRequestff{
 		const std::map<std::string,std::string>& headers() const
 		{return headers_;}
 
-		void swap(HttpRequest& that)
+		void swap(HttpRequestff& that)
 		{
 			std::swap(method_,that.method_);
 			std::swap(version_,that.version_);

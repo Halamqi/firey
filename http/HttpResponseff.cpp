@@ -40,7 +40,7 @@ void HttpResponseff::appendToBuffer(Bufferff* output) const
 	}
 	else
 	{
-		snprintf(buf,sizeof buf,"Content-Length: %zd\r\n",body_size());
+		snprintf(buf,sizeof buf,"Content-Length: %zd\r\n",body_.size());
 		output->append(buf);
 		output->append("Connection: Keep-Alive\r\n");
 	}

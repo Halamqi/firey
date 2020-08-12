@@ -11,12 +11,16 @@
 
 - 安装 
 	+ 将源码下载至用户家目录下 
+	+ 该项目依赖boost库，需要安装boost库才能正常使用，在`ubuntu`下执行`sudo apt-get install libboost-dev`,在`Centos`下执行`1.yum install boost 2.yum install boost-devel`即可
 	+ 下载源码后，在源码目录下`~/firey`下执行`./build.sh`即可安装成功 
-	+  安装后的库文件和头文件存放在目录`~/firey-build/debug-install`中 
+	+ 安装后的库文件和头文件存放在目录`~/firey-build/debug-install`中 
 
-	+ 本项目提供了一个简易的http服务器，在项目目录`firey/http`中
+	+ 本项目提供了一个简易的http服务器，在项目目录`~/firey/http`中
 	+ 安装后的二进制可执行文件存放在目录`~/firey-build/bin`中
 
 - 使用 
 	+ 在使用时，除了需要包含在`~/firey-build/debug-install/include`中的头文件之外。在编译时，还需添加链接库路径`~/firey-build/debug-install/lib`，并链接库`-lfirey_net`。
 	+ 或是直接在Makefile文件中配置头文件路径和库路径
+
+- 依赖
+	+ boost库

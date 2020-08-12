@@ -5,6 +5,8 @@
 
 using namespace firey;
 
+const char Bufferff::kCRLF[]="\r\n";
+
 const size_t Bufferff::kCheapPrepend;
 const size_t Bufferff::kInitialSize;
 

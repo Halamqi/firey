@@ -24,7 +24,7 @@ class HttpServerff{
 					 TcpServerff::Option option=TcpServerff::kNoReusePort);
 		EventLoopff* getLoop(){return server_.getLoop();}
 
-		void setHttpCalback(const HttpCallback& cb)
+		void setHttpCallback(const HttpCallback& cb)
 		{
 			httpCallback_=cb;
 		}

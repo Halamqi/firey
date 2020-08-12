@@ -20,7 +20,8 @@ Pollerff::Pollerff(EventLoopff* loop)
 	eventsList_(kinitEventListSize),
 	epollFd_(::epoll_create(1))
 {
-	LOG_SYSFATAL<<"Pollerff::Pollerff()";
+	if(epollFd_<0)
+		LOG_SYSFATAL<<"Pollerff::Pollerff()";
 }
 
 Pollerff::~Pollerff(){

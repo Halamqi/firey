@@ -14,3 +14,6 @@ set(HEADERS
 	HttpRequestff.h
 	HttpResponseff.h)
 install(FILES ${HEADERS} DESTINATION include)
+
+add_executable(httpserver_test httpserver_test.cpp)
+target_link_libraries(httpserver_test firey_http)

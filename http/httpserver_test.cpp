@@ -6,9 +6,10 @@
 #include "HttpResponseff.h"
 
 #include "Loggingff.h"
-//#include "AsyncLoggingff.h"
+#include "AsyncLoggingff.h"
 
 #include <iostream>
+#include <memory>
 
 using namespace firey;
 
@@ -17,7 +18,7 @@ bool benchmark=false;
 
 void onRequest(const HttpRequestff& req,HttpResponseff* resp)
 {
-	//std::cout<<"Headers: "<<req.methodToString()<<" "<<req.path()<<std::endl;
+	LOG_TRACE<<"Headers: "<<req.methodToString()<<" "<<req.path()<<req.query();
 	if(!benchmark)
 	{
 		auto headers=req.headers();
@@ -64,6 +65,22 @@ void onRequest(const HttpRequestff& req,HttpResponseff* resp)
 	}
 }
 
+std::unique_ptr<AsyncLoggingff> g_asynclog;
+const int kRollSize=1*1024*1024*1024;
+
+
+void output(const char* msg,int len)
+{
+	g_asynclog->append(msg,len);
+}
+
+void setAsyncLogger(const char* basename)
+{
+	g_asynclog.reset(new AsyncLoggingff(basename,kRollSize));
+	Loggerff::setOutput(output);
+	g_asynclog->start();
+}
+
 int main(int argc,char* argv[])
 {
 	int numThreads=0;
@@ -73,6 +90,16 @@ int main(int argc,char* argv[])
 		Loggerff::setLogLevel(Loggerff::WARN);
 		numThreads=atoi(argv[1]);
 	}
+	
+	if(argc>=2)
+	{
+		if(strcmp(argv[2],"on")==0)
+		{
+			Loggerff::setLogLevel(Loggerff::TRACE);
+			setAsyncLogger(::basename(argv[0]));
+		}
+	}
+
 	EventLoopff loop;
 	InetAddressff listenAddr(8000);
 	HttpServerff server(&loop,listenAddr,"Firey Http Server");

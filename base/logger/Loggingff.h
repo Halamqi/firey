@@ -99,7 +99,7 @@ inline Loggerff::LogLevel Loggerff::logLevel()
 }
 
 
-	//定义日志输出的宏
+//定义日志输出的宏
 #define LOG_TRACE if (firey::Loggerff::logLevel() <= firey::Loggerff::TRACE) \
 	firey::Loggerff(__FILE__, __LINE__, firey::Loggerff::TRACE, __func__).stream()
 #define LOG_DEBUG if (firey::Loggerff::logLevel() <= firey::Loggerff::DEBUG) \

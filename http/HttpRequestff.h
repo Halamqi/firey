@@ -42,6 +42,26 @@ class HttpRequestff{
 
 		Version getVersion() const
 		{return version_;}
+		
+		const char* versionToString() const
+		{
+			const char* ret="UNKOWN";
+			switch (version_)
+			{
+				case kHttp10:
+					ret="HTTP/1.0";
+					break;
+				case kHttp11:
+					ret="HTTP/1.1";
+					break;
+				case kHttp20:
+					ret="HTTP/2.0";
+					break;
+				default:
+					break;
+			}
+			return ret;
+		}
 
 		bool setMethod(const char* start,const char* end)
 		{
@@ -174,7 +194,7 @@ class HttpRequestff{
 		Timestampff receiveTime_;
 		//头部字段
 		std::map<std::string,std::string> headers_;
-
+		//TODO BODY
 	};//class HttpRequestff
 }//namespace firey
 #endif //FF_HTTP_REQUEST_H_

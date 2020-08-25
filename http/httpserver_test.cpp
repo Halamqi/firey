@@ -18,7 +18,7 @@ bool benchmark=false;
 
 void onRequest(const HttpRequestff& req,HttpResponseff* resp)
 {
-	LOG_TRACE<<"Headers: "<<req.methodToString()<<" "<<req.path()<<req.query();
+	std::cout<<req.methodToString()<<" "<<req.path()<<req.query()<<" "<<req.versionToString()<<std::endl;
 	if(!benchmark)
 	{
 		auto headers=req.headers();
@@ -47,6 +47,7 @@ void onRequest(const HttpRequestff& req,HttpResponseff* resp)
 		resp->setStatusCode(HttpResponseff::k200Ok);
 		resp->setStatusMessage("OK");
 		resp->setContentType("image/png");
+		resp->addHeader("Server","Firey");
 		resp->setBody(std::string(favicon,sizeof favicon));
 	}
 	else if(req.path()=="/hello")

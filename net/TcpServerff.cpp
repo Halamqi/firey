@@ -78,7 +78,7 @@ void TcpServerff::start(){
 		ownerLoop_->runInLoop(
 				std::bind(&Acceptorff::listen,acceptor_.get()));
 	}
-	LOG_DEBUG<<"Server ["<<name_<<"] is started"
+	LOG_DEBUG<<"Server ["<<name_<<"] is started "
 		<<(ioThreadPool_->threadNum()>0?" with a iothreadpool":"");
 }
 
@@ -91,7 +91,7 @@ void TcpServerff::removeConnectionInLoop(const TcpConnectionPtr& conn){
 	ownerLoop_->assertInLoopThread();
 
 	LOG_INFO<<"TcpServerff::removeConnectionInLoop() ["<<name_
-		<<"] - connection"<<conn->name();
+		<<"] - connection "<<conn->name();
 
 	size_t n=connections_.erase(conn->name());
 	(void) n;

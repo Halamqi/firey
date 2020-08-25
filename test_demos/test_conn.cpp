@@ -42,6 +42,7 @@ class echoServer{
 			std::string msg=buffer->retrieveAllAsString();
 			printf("%s send a message: %s",conn->peerAddr().toIpPort().data(),msg.data());
 			conn->send(msg);
+			abort();
 		}
 };
 
